@@ -1,0 +1,163 @@
+/* Video Card Styles */
+.video-card {
+  width: 100%;
+  height: 90vh; /* 90% of viewport height */
+  background-color: #000; /* Black background for full-screen video */
+  overflow: hidden;
+  position: relative;
+  scroll-snap-align: start; /* Snap to start of each video */
+  scroll-snap-stop: always; /* Ensures it stops at each video */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* Prevent video cards from shrinking in flex container */
+}
+
+.video-info {
+  padding: 2.5%;
+  text-align: left;
+}
+
+.video-title {
+  margin: 0 0 1.5% 0;
+  font-size: 1.2em;
+  color: #333;
+}
+
+.video-company, .video-date {
+  margin: 0.8% 0;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.video-info-content h2 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.5em;
+}
+
+.video-info-content p {
+  margin: 1.5% 0;
+  color: #666;
+  font-size: 1.1em;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* This ensures the video fills the container, cropping if necessary for full coverage */
+  z-index: 1; /* Make sure video is below controls and like button */
+  pointer-events: auto; /* Allow interaction with video controls */
+}
+
+/* Like Button Styles */
+.like-button {
+  position: absolute;
+  top: 1.5%;
+  right: 1.5%;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 3%;
+  padding: 1.2% 1.8%;
+  font-size: 2.1vw;
+  cursor: pointer;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.8%;
+  transition: background-color 0.3s;
+}
+
+.like-button:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.like-button.liked {
+  color: #ff4081;
+}
+
+/* Swipe Indicator Styles */
+.swipe-indicator {
+  position: absolute;
+  bottom: 20%; /* Positioned higher to account for video controls area */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 1.2% 2.4%;
+  border-radius: 3%;
+  font-size: 2.1vw;
+  z-index: 15; /* Higher than video but lower than like button */
+}
+
+/* Video Info View Styles */
+.video-info-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  padding: 3%;
+  box-sizing: border-box;
+}
+
+.video-info-content {
+  max-width: 100%;
+  text-align: center;
+  padding: 3%;
+}
+
+.video-info-content h2 {
+  margin-top: 0;
+  margin-bottom: 2.25%;
+  color: #333;
+  font-size: 1.5em;
+}
+
+.video-info-content p {
+  margin: 1.5% 0;
+  color: #666;
+  font-size: 1.1em;
+}
+
+.like-stats {
+  margin: 3% 0;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #282c34;
+}
+
+.back-to-video-btn {
+  background-color: #282c34;
+  color: white;
+  border: none;
+  padding: 1.8% 3.6%;
+  border-radius: 0.6%;
+  cursor: pointer;
+  font-size: 2.4vw;
+  margin-top: 3%;
+  display: inline-flex;
+  align-items: center;
+  gap: 1.2%;
+}
+
+.back-to-video-btn:hover {
+  background-color: #3a3f47;
+}
+
+/* Remove hover effects for continuous feed */
+.video-card:hover {
+  transform: none;
+  box-shadow: none;
+}

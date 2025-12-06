@@ -1,0 +1,105 @@
+// UserController.js - Business logic for user operations
+
+import {
+  getUsers,
+  addUser,
+  getUserById,
+  getUserByEmail,
+  updateUser as updateUserInStorage,
+  removeUser
+} from '../storage/userStorage.js';
+
+/**
+ * Register a new user
+ */
+export async function registerUser(userData) {
+  const { email, password, name } = userData;
+
+  if (!email || !password || !name) {
+    throw new Error('Email, password, and name are required');
+  }
+
+  // Check if user already exists
+  const existingUser = getUserByEmail(email);
+  if (existingUser) {
+    throw new Error('User with this email already exists');
+  }
+
+  // Create new user
+  const userId = Date.now().toString(); // Simple ID generation
+  const newUser = {
+    id: userId,
+    email,
+    name,
+    password, // In a real app, this should be hashed
+    createdAt: new Date().toISOString(),
+    watchHistory: [],
+    savedVideos: [],
+    likedVideos: [] // Track liked videos on the user
+  };
+
+  addUser(newUser);
+
+  // Return the user object (without password)
+  const { password: _, ...userWithoutPassword } = newUser;
+  return userWithoutPassword;
+}
+
+/**
+ * Login user
+ */
+export async function loginUser(credentials) {
+  const { email, password } = credentials;
+
+  if (!email || !password) {
+    throw new Error('Email and password are required');
+  }
+
+  // Find user by email
+  const foundUser = getUserByEmail(email);
+
+  if (!foundUser || foundUser.password !== password) {
+    throw new Error('Invalid email or password');
+  }
+
+  // Return the user object (without password)
+  const { password: _, ...userWithoutPassword } = foundUser;
+  return userWithoutPassword;
+}
+
+/**
+ * Get user profile by ID
+ */
+export async function getUserProfile(userId) {
+  const user = getUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Return the user object (without password)
+  const { password: _, ...userWithoutPassword } = user;
+  return userWithoutPassword;
+}
+
+/**
+ * Update user profile
+ */
+export async function updateUserProfile(userId, profileData) {
+  const { name, email } = profileData;
+
+  const user = getUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Update fields if provided
+  const updatedUser = { ...user };
+  if (name) updatedUser.name = name;
+  if (email) updatedUser.email = email;
+
+  const savedUser = updateUserInStorage(userId, updatedUser);
+
+  // Return the updated user object (without password)
+  const { password: _, ...userWithoutPassword } = savedUser;
+  return userWithoutPassword;
+}

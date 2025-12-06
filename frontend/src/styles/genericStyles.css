@@ -1,0 +1,106 @@
+/* Generic/Global Styles */
+.App {
+  text-align: center;
+  width: calc(90vh * 9 / 16); /* Match the video feed width for consistent 9:16 aspect ratio */
+  margin: 0 auto;
+  padding: 0; /* Remove padding for full-screen experience */
+  font-family: Arial, sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent double scrollbars */
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 3% 2.5%;
+  color: white;
+  border-radius: 0; /* No border-radius for continuous feel */
+  flex-shrink: 0; /* Don't shrink header */
+  z-index: 100; /* Keep header visible */
+}
+
+.App-header h1 {
+  margin: 0;
+}
+
+main {
+  flex: 1; /* Take remaining space */
+  overflow: hidden; /* Contain the feed scroll */
+  position: relative; /* For proper positioning */
+}
+
+/* Loading and Error Styles */
+.loading, .error {
+  padding: 3%;
+  font-size: 1.2em;
+}
+
+.loading {
+  color: #666;
+}
+
+.error {
+  color: #d32f2f;
+}
+
+/* Avatar Placeholder Styles */
+.avatar-placeholder {
+  width: 9%;
+  height: 9%;
+  border-radius: 50%;
+  background-color: #282c34;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 3.6vw;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+}
+
+/* Loading and Error Styles */
+.loading, .error {
+  padding: 3%;
+  font-size: 1.2em;
+}
+
+.loading {
+  color: #666;
+}
+
+.error {
+  color: #d32f2f;
+}
+
+/* User Header Info Styles */
+.user-header-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5%;
+}
+
+.welcome-text {
+  color: white;
+  font-size: 1vw;
+}
+
+/* Stat Item Styles */
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 12%;
+}
+
+.stat-number {
+  font-size: 2em;
+  font-weight: bold;
+  color: #282c34;
+}
+
+.stat-label {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 0.75%;
+}
