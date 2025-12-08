@@ -2,242 +2,272 @@
 .profile-screen {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 3%;
+  height: 95vh;
+  /* Match video feed height (95vh) */
+  padding: var(--spacing-md);
+  box-sizing: border-box;
+  background-color: var(--color-bg);
+  overflow-y: auto;
+  /* Allow scrolling within the profile area if needed */
 }
 
-.profile-header {
-  margin-bottom: 4.5%;
-}
-
-.profile-header h2 {
-  margin: 0;
-  color: #333;
-  font-size: 1.8em;
-}
-
-.profile-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4.5%;
-}
-
-.profile-stats {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: 2.25%;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 18%;
-}
-
-.stat-number {
-  font-size: 2em;
-  font-weight: bold;
-  color: #282c34;
-}
-
-.stat-label {
-  font-size: 0.9em;
-  color: #666;
-  margin-top: 0.75%;
-}
-
-/* User Info Card Styles */
-.user-info-card {
-  display: flex;
-  align-items: center;
-  background-color: white;
-  padding: 3%;
-  border-radius: 1.2%;
-  box-shadow: 0 0.3% 0.6% rgba(0,0,0,0.1);
-  margin-bottom: 4.5%;
-  justify-content: space-between;
-}
-
-.user-avatar {
-  margin-right: 2.25%;
-}
-
-.avatar-placeholder {
-  width: 9%;
-  height: 9%;
-  border-radius: 50%;
-  background-color: #282c34;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 3.6vw;
-  font-weight: bold;
-}
-
-.user-details {
-  flex: 1;
-  text-align: left;
-  margin: 0 2.25%;
-}
-
-.user-details h3 {
-  margin: 0 0 0.75% 0;
-  color: #333;
-  font-size: 1.2em;
-}
-
-.user-email {
-  margin: 0;
-  color: #666;
-  font-size: 0.9em;
-}
-
-.logout-button {
-  background-color: #e53935;
-  color: white;
-  border: none;
-  padding: 1.5% 3%;
-  border-radius: 0.6%;
-  cursor: pointer;
-}
-
-.logout-button:hover {
-  background-color: #b71c1c;
-}
-
-.profile-actions {
-  background-color: white;
-  padding: 3%;
-  border-radius: 1.2%;
-  box-shadow: 0 0.3% 0.6% rgba(0,0,0,0.1);
-}
-
-.profile-actions h3 {
-  margin-top: 0;
-  color: #333;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 1.2%;
-}
-
-.action-button {
-  flex: 1;
-  min-width: 18%;
-  padding: 1.8%;
-  background-color: #f5f5f5;
-  border: 0.15% solid #ddd;
-  border-radius: 0.6%;
-  cursor: pointer;
-}
-
-.action-button:hover {
-  background-color: #e0e0e0;
-}
-
-/* Auth Form Styles */
+/* Auth Container - Centered and Clean */
 .auth-container {
   display: flex;
+  flex-direction: column;
+  /* Ensure content stacks properly */
   justify-content: center;
   align-items: center;
-  min-height: 60vh; /* Convert px to vh */
-  padding: 3%;
+  padding: var(--spacing-lg);
+  height: 100%;
+  /* Fill the 95vh container */
 }
 
 .auth-form {
   width: 100%;
-  max-width: 60%;
-  background-color: white;
-  padding: 4.5%;
-  border-radius: 1.2%;
-  box-shadow: 0 0.6% 1.8% rgba(0,0,0,0.1);
+  max-width: 400px;
+  /* Cap width for desktop but fluid for mobile */
+  background: transparent;
+  /* Remove boxy background */
+  padding: var(--spacing-md);
 }
 
 .auth-form h2 {
   text-align: center;
-  margin-bottom: 3.75%;
-  color: #333;
+  margin-bottom: var(--spacing-xl);
+  color: var(--color-text);
+  font-size: 8vw;
+  /* Large, bold title */
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
+/* Form Groups */
 .form-group {
-  margin-bottom: 3%;
+  margin-bottom: var(--spacing-lg);
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.75%;
-  color: #555;
-  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+  color: #888;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .form-group input {
   width: 100%;
-  padding: 1.8%;
-  border: 0.15% solid #ddd;
-  border-radius: 0.6%;
-  font-size: 2.4vw;
+  padding: 15px;
+  /* Fixed comfortable padding */
+  border: 1px solid #333;
+  border-radius: 12px;
+  /* Smooth rounded corners */
+  font-size: var(--font-size-md);
   box-sizing: border-box;
+  background-color: #1a1a1a;
+  /* Very dark grey, almost black */
+  color: var(--color-text);
+  transition: all 0.3s ease;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #282c34;
+  border-color: var(--color-primary);
+  background-color: #222;
+  box-shadow: 0 0 0 2px rgba(255, 0, 80, 0.2);
 }
 
+/* Authentication Button */
 .auth-button {
   width: 100%;
-  padding: 2.1%;
-  background-color: #282c34;
+  padding: 16px;
+  background-color: var(--color-primary);
   color: white;
   border: none;
-  border-radius: 0.6%;
-  font-size: 2.4vw;
+  border-radius: 12px;
+  font-size: var(--font-size-md);
+  font-weight: 700;
   cursor: pointer;
-  margin-top: 1.5%;
+  margin-top: var(--spacing-md);
+  transition: transform 0.2s, opacity 0.2s;
 }
 
-.auth-button:hover {
-  background-color: #3a3f47;
+.auth-button:active {
+  transform: scale(0.98);
 }
 
 .auth-button:disabled {
-  background-color: #ccc;
+  background-color: #333;
+  color: #666;
   cursor: not-allowed;
 }
 
+/* Switch Auth Link */
 .switch-auth {
-  margin-top: 3%;
+  margin-top: var(--spacing-xl);
   text-align: center;
 }
 
 .switch-auth p {
   margin: 0;
   color: #666;
+  font-size: var(--font-size-sm);
 }
 
 .link-button {
   background: none;
   border: none;
-  color: #282c34;
-  text-decoration: underline;
+  color: var(--color-primary);
+  font-weight: bold;
   cursor: pointer;
   font-size: inherit;
-  padding: 0;
-}
-
-.link-button:hover {
-  color: #3a3f47;
+  padding: 0 0 0 5px;
 }
 
 .error-message {
-  background-color: #ffebee;
-  color: #c62828;
-  padding: 1.8%;
-  border-radius: 0.6%;
-  margin-bottom: 2.25%;
+  background-color: rgba(255, 0, 80, 0.1);
+  color: #ff0050;
+  padding: var(--spacing-md);
+  border-radius: 8px;
+  margin-bottom: var(--spacing-lg);
   text-align: center;
+  font-size: var(--font-size-sm);
+  border: 1px solid rgba(255, 0, 80, 0.2);
+}
+
+/* LOGGED IN VIEW */
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+}
+
+.avatar-placeholder {
+  width: 100px;
+  /* Fixed size for avatar */
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #333 0%, #111 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: var(--spacing-md);
+  border: 2px solid #333;
+}
+
+.profile-header h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 4vh;
+  /* Relative to height, cleaner */
+  font-weight: 700;
+}
+
+.user-email {
+  color: #888;
+  font-size: 2vh;
+  /* Relative to height */
+  margin-top: var(--spacing-xs);
+}
+
+/* Stats Row - Perfect Thirds */
+.profile-stats {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 3vh;
+  padding: 2vh 0;
+  border-bottom: 1px solid #222;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 33.33%;
+  overflow: hidden;
+  padding: 0 1vw;
+  box-sizing: border-box;
+}
+
+.stat-number {
+  font-size: 3.5vh;
+  /* Matched to be relative to screen height */
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 1.8vh;
+  /* Matched to be relative to screen height */
+  color: #888;
+  font-weight: 500;
+  margin-top: 0.5vh;
+  white-space: nowrap;
+}
+
+/* Action Buttons - Sleeker & Premium */
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2vh;
+  /* Relative gap */
+  align-items: center;
+  width: 100%;
+}
+
+
+.action-button {
+  width: 100%;
+  max-width: 85%;
+  /* Comfortable width */
+  padding: 16px;
+  background-color: rgba(255, 255, 255, 0.03);
+  /* Glassy feel */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: var(--color-text);
+  font-size: 16px;
+  /* Fixed readable size */
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.action-button:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.logout-button {
+  margin-top: 24px;
+  background-color: transparent;
+  border: none;
+  color: #ff4444;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.logout-button:hover {
+  background-color: transparent;
+  color: #ff6666;
+  opacity: 1;
+  transform: none;
+  text-decoration: underline;
 }

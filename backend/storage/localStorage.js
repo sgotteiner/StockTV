@@ -34,12 +34,14 @@ export function listVideos() {
         return videoFiles.map((file, index) => {
             // Generate a more unique ID based on the filename
             const id = crypto.createHash('md5').update(file).digest('hex').substring(0, 8);
+            // Properly encode the filename for use in URLs
+            const encodedFileName = encodeURIComponent(file);
             return {
                 id: id,
                 title: getVideoTitle(file),
                 company: getCompanyFromFilename(file),
                 date: getFileModifiedDate(path.join(videosDir, file)),
-                file_path: `${BACKEND_URL}/videos/${file}`
+                file_path: `${BACKEND_URL}/videos/${encodedFileName}`
             };
         });
     } catch (error) {

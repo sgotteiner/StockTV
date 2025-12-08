@@ -17,6 +17,7 @@ app.get('/videos', fetchVideos);
 app.use('/api/likes', likesRouter);
 app.use('/api/users', usersRouter);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on http://0.0.0.0:${PORT}`);
+    console.log(`External access available at your IP address: http://YOUR_IP_ADDRESS:${PORT}`);
 });

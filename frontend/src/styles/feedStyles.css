@@ -3,17 +3,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100vh; /* Fill the available space */
+  height: 100vh;
+  /* Fill the available space */
 }
 
 .video-feed {
-  width: calc(90vh * 9 / 16); /* Maintain 9:16 aspect ratio */
-  height: 90vh; /* 90% of viewport height */
+  width: 100%;
+  /* Relies on App width */
+  height: 95vh;
+  /* 95% of viewport height */
   display: flex;
   flex-direction: column;
-  gap: 0; /* Remove gap for continuous feed */
-  scroll-snap-type: y mandatory; /* Enable smooth scrolling behavior */
-  overflow-y: auto; /* Enable vertical scrolling (auto instead of scroll) */
-  scroll-behavior: smooth; /* Smooth scrolling */
-  margin: 0 auto; /* Center the feed */
+  gap: 0;
+  /* Remove gap for continuous feed */
+  scroll-snap-type: y mandatory;
+  /* Enable smooth scrolling behavior */
+  overflow-y: auto;
+  /* Enable vertical scrolling (auto instead of scroll) */
+  scroll-behavior: smooth;
+  /* Smooth scrolling */
+  margin: 0 auto;
+  /* Center the feed */
 }

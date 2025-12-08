@@ -2,45 +2,62 @@
 .tab-navigator {
   display: flex;
   flex-direction: column;
-  flex: 1; /* Take remaining space */
-  overflow: hidden; /* Contain content */
+  flex: 1;
+  /* Take remaining space */
+  overflow: hidden;
+  /* Contain content */
 }
 
 .tab-content {
-  flex: 1; /* Take remaining space */
-  overflow: hidden; /* Hide overflow as feed handles its own scrolling */
-  position: relative; /* For proper positioning */
+  flex: 1;
+  /* Take remaining space */
+  overflow: hidden;
+  /* Hide overflow as feed handles its own scrolling */
+  position: relative;
+  /* For proper positioning */
 }
 
 /* Tab Bar Styles */
 .tab-bar {
-  position: fixed; /* Fixed position to always be visible at bottom */
+  position: fixed;
+  /* Fixed position to always be visible at bottom */
   bottom: 0;
   left: 50%;
-  transform: translateX(-50%); /* Center the tab bar */
-  width: calc(90vh * 9 / 16); /* Match the app width */
+  transform: translateX(-50%);
+  /* Center the tab bar */
+  width: calc(95vh * 9 / 16);
+  /* Match the video width */
+  height: 5vh;
+  /* 5% of screen height */
   display: flex;
   justify-content: space-around;
-  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
-  border-top: 0.2% solid #e0e0e0;
-  padding: 1.5% 0;
-  z-index: 1000; /* Higher z-index to ensure it's on top */
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.9);
+  /* Dark background */
+  border-top: 1px solid var(--color-bg-secondary);
+  padding: 0;
+  z-index: 1000;
+  /* Higher z-index to ensure it's on top */
 }
 
 .tab-button {
   flex: 1;
-  padding: 1.8% 0;
+  padding: 0;
   border: none;
   background: none;
-  font-size: 2.4vw;
+  font-size: 2.2vh;
+  /* Relative to viewport height (approx 44% of bar) */
   cursor: pointer;
-  color: #666;
+  color: #888;
+  /* Muted color */
   transition: color 0.3s;
   max-width: 50%;
+  margin: 0 2%;
+  /* Add relative side spacing */
 }
 
 .tab-button.active {
-  color: #282c34;
+  color: var(--color-text);
   font-weight: bold;
   position: relative;
 }
@@ -48,11 +65,11 @@
 .tab-button.active::after {
   content: '';
   position: absolute;
-  bottom: -1.5%;
+  bottom: -4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 4%;
-  height: 0.45%;
-  background-color: #282c34;
-  border-radius: 0.3%;
+  width: 20px;
+  height: 2px;
+  background-color: var(--color-text);
+  border-radius: var(--radius-sm);
 }

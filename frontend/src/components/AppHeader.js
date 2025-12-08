@@ -9,11 +9,6 @@ function AppHeader() {
     <header className="App-header">
       <div className="header-content">
         <h1>StockTV</h1>
-        {isAuthenticated && currentUser && (
-          <div className="user-header-info">
-            <span className="welcome-text">Welcome, {currentUser.name}!</span>
-          </div>
-        )}
       </div>
     </header>
   );

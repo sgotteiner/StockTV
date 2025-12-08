@@ -1,5 +1,8 @@
+import config from '../config';
+
 export async function getVideos() {
-    const response = await fetch('http://localhost:5000/videos');
+    const backendUrl = config.API_BASE_URL + '/videos';
+    const response = await fetch(backendUrl);
     if (!response.ok) {
         throw new Error('Failed to fetch videos');
     }

@@ -28,8 +28,7 @@ function TabNavigator() {
 
   return (
     <div className="tab-navigator">
-      {/* Show header only on profile screen */}
-      {activeTab === 'profile' && <AppHeader />}
+      {/* Header removed as per request */}
 
       <div className="tab-content">
         {renderContent()}

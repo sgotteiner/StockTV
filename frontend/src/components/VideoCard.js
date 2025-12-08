@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useSwipe } from '../hooks/useSwipe';
 import { useUser } from '../context/UserProvider';
 import * as likesApi from '../services/likesApi';
 import VideoInfoView from './VideoInfoView';
@@ -12,13 +13,9 @@ import '../App.css';
  */
 function VideoCard({ video, isFirst = false }) {
   // Refs for DOM elements and touch/mouse tracking
+  // Refs for DOM elements
   const videoRef = useRef(null);
   const containerRef = useRef(null);
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0); // Added for directional swipe detection
-  const touchEndX = useRef(0);
-  const mouseStartX = useRef(0);
-  const mouseEndX = useRef(0);
 
   // Context and state
   const { currentUser } = useUser();
@@ -98,97 +95,18 @@ function VideoCard({ video, isFirst = false }) {
     fetchLikeData();
   }, [video.id, currentUser]);
 
-  // Calculate swipe threshold based on current card dimensions
-  const calculateSwipeThreshold = () => {
-    // 20% of card width (which is based on 90vh * 9/16)
-    return (window.innerHeight * 0.9) * (9/16) * 0.2;
-  };
+  // Initialize Swipe Hook
+  const swipeHandlers = useSwipe({
+    onSwipeLeft: () => setShowInfo(false),
+    onSwipeRight: () => setShowInfo(true),
+    threshold: (window.innerHeight * 0.9) * (9 / 16) * 0.2
+  });
 
-  /**
-   * Touch Event Handlers
-   * Detect horizontal swipes while allowing vertical scrolling
-   */
-  const handleTouchStart = (e) => {
-    const touch = e.targetTouches[0];
-    touchStartX.current = touch.clientX;
-    touchStartY.current = touch.clientY;
-  };
 
-  const handleTouchMove = (e) => {
-    const touch = e.targetTouches[0];
-    const currentTouchX = touch.clientX;
-    const currentTouchY = touch.clientY;
 
-    // Calculate movement differences
-    const diffX = touchStartX.current - currentTouchX;
-    const diffY = touchStartY.current - currentTouchY;
 
-    // Determine if movement is primarily horizontal or vertical
-    const isPrimarilyHorizontal = Math.abs(diffX) > Math.abs(diffY);
 
-    // Only prevent default for horizontal swipes to allow vertical scrolling
-    if (isPrimarilyHorizontal) {
-      e.preventDefault();
-    }
 
-    touchEndX.current = currentTouchX;
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStartX.current || !touchEndX.current) return;
-
-    const diffX = touchStartX.current - touchEndX.current;
-    const threshold = calculateSwipeThreshold();
-
-    if (Math.abs(diffX) > threshold) {
-      if (diffX > 0) {
-        // Swiped left - return to video view
-        setShowInfo(false);
-      } else {
-        // Swiped right - show info view
-        setShowInfo(true);
-      }
-    }
-
-    // Reset touch tracking
-    touchStartX.current = 0;
-    touchEndX.current = 0;
-  };
-
-  /**
-   * Mouse Event Handlers
-   * Similar to touch events but for desktop users
-   */
-  const handleMouseDown = (e) => {
-    mouseStartX.current = e.clientX;
-  };
-
-  const handleMouseMove = (e) => {
-    // Only track when left mouse button is pressed
-    if (e.buttons !== 1) return;
-    mouseEndX.current = e.clientX;
-  };
-
-  const handleMouseUp = () => {
-    if (!mouseStartX.current || !mouseEndX.current) return;
-
-    const diffX = mouseStartX.current - mouseEndX.current;
-    const threshold = calculateSwipeThreshold();
-
-    if (Math.abs(diffX) > threshold) {
-      if (diffX > 0) {
-        // Dragged left - return to video view
-        setShowInfo(false);
-      } else {
-        // Dragged right - show info view
-        setShowInfo(true);
-      }
-    }
-
-    // Reset mouse tracking
-    mouseStartX.current = 0;
-    mouseEndX.current = 0;
-  };
 
   // Handle like/unlike functionality
   const handleLike = async () => {
@@ -230,18 +148,7 @@ function VideoCard({ video, isFirst = false }) {
         // Main video view
         <div
           className="video-container"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={() => {
-            // Reset tracking when mouse leaves
-            mouseStartX.current = 0;
-            mouseEndX.current = 0;
-          }}
+          {...swipeHandlers}
         >
           <video
             ref={videoRef}

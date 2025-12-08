@@ -1,3 +1,31 @@
+:root {
+  /* Colors */
+  --color-primary: #ff0050;
+  --color-text: #ffffff;
+  --color-bg: #000000;
+  --color-bg-secondary: #333333;
+  --color-overlay: rgba(0, 0, 0, 0.4);
+
+  /* Spacing - Using % of container width */
+  --spacing-xs: 1%;
+  --spacing-sm: 2%;
+  --spacing-md: 3%;
+  --spacing-lg: 5%;
+  --spacing-xl: 8%;
+
+  /* Borders */
+  --radius-sm: 1%;
+  --radius-md: 2%;
+  --radius-lg: 4%;
+  --radius-full: 50%;
+
+  /* Typography - Using viewport width for scaling text */
+  --font-size-sm: 2.5vw;
+  --font-size-md: 3.5vw;
+  --font-size-lg: 4.5vw;
+  --font-size-xl: 6vw;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,6 +33,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
 code {
