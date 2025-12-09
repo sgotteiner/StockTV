@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react'; // Removed useState
+import { useNavigation } from '../context/NavigationContext';
 import AppHeader from './AppHeader';
 import FeedScreen from '../screens/FeedScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -9,7 +10,7 @@ import '../App.css';
  * Manages navigation between different app sections (Feed and Profile)
  */
 function TabNavigator() {
-  const [activeTab, setActiveTab] = useState('feed');
+  const { activeTab, setActiveTab } = useNavigation();
 
   /**
    * Renders the appropriate screen based on the active tab

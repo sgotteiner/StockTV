@@ -1,14 +1,15 @@
-import { getVideos } from '../services/videoService.js';
+import { getAllVideos } from '../storage/videoStorage.js';
 
 export const fetchVideos = (req, res) => {
     try {
-        const videos = getVideos();
+        const videos = getAllVideos();
 
-        // Update the file_path to use the actual request host instead of localhost
+        // Update the file_path to use the actual request host instead of localhost/env default
+        // This ensures it works for mobile/external devices testing via IP
         const actualHost = `${req.protocol}://${req.get('host')}`;
         const updatedVideos = videos.map(video => ({
             ...video,
-            file_path: video.file_path.replace('http://localhost:5000', actualHost)
+            file_path: video.file_path.replace(/(https?:\/\/[^\/]+)/, actualHost)
         }));
 
         res.json(updatedVideos);

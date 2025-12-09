@@ -1,6 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSwipe } from '../hooks/useSwipe';
+import { useVideoPlayback } from '../hooks/useVideoPlayback';
 import { useUser } from '../context/UserProvider';
+import { useNavigation } from '../context/NavigationContext';
+import { useMedia } from '../context/MediaContext';
 import * as likesApi from '../services/likesApi';
 import VideoInfoView from './VideoInfoView';
 import '../App.css';
@@ -8,74 +11,31 @@ import '../App.css';
 /**
  * VideoCard Component
  * Displays a single video with swipe functionality and like button
- * @param {Object} video - Video object with id, title, company, date, file_path
- * @param {boolean} isFirst - Whether this is the first video (for auto-play settings)
  */
 function VideoCard({ video, isFirst = false }) {
-  // Refs for DOM elements and touch/mouse tracking
-  // Refs for DOM elements
-  const videoRef = useRef(null);
-  const containerRef = useRef(null);
+  // Use custom playback hook
+  const {
+    videoRef,
+    containerRef,
+    isPlaying,
+    progress,
+    togglePlayPause,
+    handleTimeUpdate,
+    handleSeek,
+    handleVideoEnd
+  } = useVideoPlayback(isFirst);
 
-  // Context and state
+  // Context and other state
   const { currentUser } = useUser();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isInView, setIsInView] = useState(false);
+  const { setActiveTab } = useNavigation();
+  const { isMuted, toggleMute } = useMedia();
+
   const [likeCount, setLikeCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showInfo, setShowInfo] = useState(false); // Toggle between video and info view
+  const [showInfo, setShowInfo] = useState(false);
 
-  // Auto play/pause when video enters/leaves viewport
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            setIsInView(true);
-          } else {
-            setIsInView(false);
-          }
-        });
-      },
-      { threshold: 0.5 } // Trigger when 50% of element is visible
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
-      }
-    };
-  }, []);
-
-  // Handle auto play/pause based on visibility
-  useEffect(() => {
-    if (videoRef.current) {
-      if (isInView) {
-        const playPromise = videoRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => setIsPlaying(true))
-            .catch(error => {
-              console.error('Error playing video:', error);
-            });
-        }
-      } else {
-        try {
-          videoRef.current.pause();
-          setIsPlaying(false);
-        } catch (error) {
-          console.error('Error pausing video:', error);
-        }
-      }
-    }
-  }, [isInView]);
-
-  // Load initial like data when component mounts
+  // Load initial like data
   useEffect(() => {
     const fetchLikeData = async () => {
       try {
@@ -84,55 +44,45 @@ function VideoCard({ video, isFirst = false }) {
           const userLikedVideoIds = userLikes.likedVideos.map(item => item.videoId);
           setIsLiked(userLikedVideoIds.includes(video.id));
         }
-
         const likeData = await likesApi.getVideoLikes(video.id);
         setLikeCount(likeData.likeCount);
       } catch (error) {
         console.error('Error fetching like data:', error);
       }
     };
-
     fetchLikeData();
   }, [video.id, currentUser]);
 
-  // Initialize Swipe Hook
+  // Use Swipe Hook
   const swipeHandlers = useSwipe({
     onSwipeLeft: () => setShowInfo(false),
     onSwipeRight: () => setShowInfo(true),
     threshold: (window.innerHeight * 0.9) * (9 / 16) * 0.2
   });
 
-
-
-
-
-
-
   // Handle like/unlike functionality
   const handleLike = async () => {
     if (!currentUser) {
-      alert('Please log in to like videos');
+      if (window.confirm('Please log in to like videos. Go to login page?')) {
+        setActiveTab('profile');
+      }
       return;
     }
 
     if (isLoading) return;
-
     setIsLoading(true);
 
     try {
       if (isLiked) {
-        // Unlike the video
         const result = await likesApi.unlikeVideo(video.id, currentUser.id);
         setLikeCount(result.likeCount);
         setIsLiked(false);
       } else {
-        // Like the video
         const result = await likesApi.likeVideo(video.id, currentUser.id);
         setLikeCount(result.likeCount);
         setIsLiked(true);
       }
     } catch (error) {
-      console.error('Error updating like:', error);
       alert('Failed to update like. Please try again.');
     } finally {
       setIsLoading(false);
@@ -149,44 +99,58 @@ function VideoCard({ video, isFirst = false }) {
         <div
           className="video-container"
           {...swipeHandlers}
+          onClick={togglePlayPause} // Tap to Play/Pause
         >
           <video
             ref={videoRef}
             src={video.file_path}
-            controls
-            autoPlay
-            muted={isFirst}
-            preload="metadata"
+            playsInline
             className="video-player"
-            onEnded={() => {
-              // Scroll to next video when current one ends
-              const nextCard = containerRef.current?.nextElementSibling;
-              if (nextCard) {
-                nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                const nextVideo = nextCard.querySelector('video');
-                if (nextVideo) {
-                  nextVideo.play().catch(e => console.error('Error playing next video:', e));
-                }
-              }
-            }}
-            onError={(e) => console.error('Video loading error:', e)}
-            onLoadedMetadata={() => {
-              if (videoRef.current && !videoRef.current.playing) {
-                const playPromise = videoRef.current.play();
-                if (playPromise !== undefined) {
-                  playPromise
-                    .then(() => setIsPlaying(true))
-                    .catch(error => {
-                      console.info('Autoplay failed due to browser policy:', error);
-                    });
-                }
-              }
-            }}
-            onCanPlay={() => console.log('Video can play')}
+            onTimeUpdate={handleTimeUpdate}
+            onEnded={handleVideoEnd}
           />
+
+          {/* Custom Play/Pause Overlay Icon */}
+          {!isPlaying && (
+            <div className="play-icon-overlay">▶</div>
+          )}
+
+          {/* Progress Bar */}
+          <div
+            className="video-progress-container"
+            onClick={handleSeek}
+            style={{ cursor: 'pointer' }}
+          >
+            <div
+              className="video-progress-bar"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          {/* Mute Indicator Overlay */}
+          <button
+            className="mute-overlay"
+            style={{
+              position: 'absolute',
+              top: '2%',
+              left: '2%',
+              zIndex: 20,
+              background: 'rgba(0,0,0,0.5)',
+              border: 'none',
+              borderRadius: '50%',
+              padding: '10px',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: 'white'
+            }}
+            onClick={(e) => { e.stopPropagation(); toggleMute(); }}
+          >
+            {isMuted ? '🔇' : '🔊'}
+          </button>
+
           <button
             className={`like-button ${isLiked ? 'liked' : ''}`}
-            onClick={handleLike}
+            onClick={(e) => { e.stopPropagation(); handleLike(); }}
           >
             {isLiked ? '♥' : '♡'} {likeCount}
           </button>

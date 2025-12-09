@@ -58,6 +58,16 @@ export function getUserByEmail(email) {
   return null;
 }
 
+export function getUserByName(name) {
+  const usersData = getUsers();
+  for (const userId in usersData) {
+    if (usersData[userId].name === name) {
+      return usersData[userId];
+    }
+  }
+  return null;
+}
+
 export function updateUser(userId, updatedUser) {
   const usersData = getUsers();
   if (usersData[userId]) {

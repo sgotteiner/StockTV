@@ -7,6 +7,10 @@ import './styles/videoStyles.css';
 import './styles/tabNavigatorStyles.css';
 import './styles/profileStyles.css';
 
+import { NavigationProvider } from './context/NavigationContext';
+
+import { MediaProvider } from './context/MediaContext';
+
 /**
  * Main App Component
  * Entry point for the application, sets up user context and tab navigation
@@ -14,11 +18,15 @@ import './styles/profileStyles.css';
 function App() {
   return (
     <UserProvider>
-      <div className="App">
-        <main>
-          <TabNavigator />
-        </main>
-      </div>
+      <MediaProvider>
+        <NavigationProvider>
+          <div className="App">
+            <main>
+              <TabNavigator />
+            </main>
+          </div>
+        </NavigationProvider>
+      </MediaProvider>
     </UserProvider>
   );
 }

@@ -15,6 +15,9 @@ const VideoInfoView = ({ video, likeCount, onBack }) => {
         <h2 className="video-title">{video.title}</h2>
         <p className="video-company">Company: {video.company}</p>
         <p className="video-date">Date: {video.date}</p>
+        {video.description && (
+          <p className="video-description">{video.description}</p>
+        )}
         <div className="like-stats">
           <p>Likes: {likeCount}</p>
         </div>

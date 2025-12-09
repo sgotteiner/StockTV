@@ -15,43 +15,41 @@
 .auth-container {
   display: flex;
   flex-direction: column;
-  /* Ensure content stacks properly */
   justify-content: center;
   align-items: center;
-  padding: var(--spacing-lg);
+  padding: 0;
   height: 100%;
-  /* Fill the 95vh container */
 }
 
 .auth-form {
   width: 100%;
-  max-width: 400px;
-  /* Cap width for desktop but fluid for mobile */
+  max-width: 85%;
+  /* Responsive width */
   background: transparent;
-  /* Remove boxy background */
-  padding: var(--spacing-md);
+  padding: 2vh 0;
 }
 
 .auth-form h2 {
   text-align: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 5vh;
   color: var(--color-text);
-  font-size: 8vw;
-  /* Large, bold title */
+  font-size: 5vh;
+  /* Large, bold relative title */
   font-weight: 800;
   letter-spacing: -0.5px;
 }
 
 /* Form Groups */
 .form-group {
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 3vh;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: 1vh;
   color: #888;
-  font-size: var(--font-size-sm);
+  font-size: 2vh;
+  /* Relative label */
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -59,15 +57,14 @@
 
 .form-group input {
   width: 100%;
-  padding: 15px;
-  /* Fixed comfortable padding */
+  padding: 1.5vh;
+  /* Relative padding */
   border: 1px solid #333;
   border-radius: 12px;
-  /* Smooth rounded corners */
-  font-size: var(--font-size-md);
+  font-size: 2.2vh;
+  /* Relative input text */
   box-sizing: border-box;
   background-color: #1a1a1a;
-  /* Very dark grey, almost black */
   color: var(--color-text);
   transition: all 0.3s ease;
 }
@@ -82,15 +79,16 @@
 /* Authentication Button */
 .auth-button {
   width: 100%;
-  padding: 16px;
+  padding: 2vh;
   background-color: var(--color-primary);
   color: white;
   border: none;
   border-radius: 12px;
-  font-size: var(--font-size-md);
+  font-size: 2.5vh;
+  /* Prominent button text */
   font-weight: 700;
   cursor: pointer;
-  margin-top: var(--spacing-md);
+  margin-top: 2vh;
   transition: transform 0.2s, opacity 0.2s;
 }
 
@@ -106,14 +104,14 @@
 
 /* Switch Auth Link */
 .switch-auth {
-  margin-top: var(--spacing-xl);
+  margin-top: 4vh;
   text-align: center;
 }
 
 .switch-auth p {
   margin: 0;
   color: #666;
-  font-size: var(--font-size-sm);
+  font-size: 2vh;
 }
 
 .link-button {
@@ -123,17 +121,17 @@
   font-weight: bold;
   cursor: pointer;
   font-size: inherit;
-  padding: 0 0 0 5px;
+  padding: 0 0 0 0.5em;
 }
 
 .error-message {
   background-color: rgba(255, 0, 80, 0.1);
   color: #ff0050;
-  padding: var(--spacing-md);
+  padding: 1.5vh;
   border-radius: 8px;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 3vh;
   text-align: center;
-  font-size: var(--font-size-sm);
+  font-size: 2vh;
   border: 1px solid rgba(255, 0, 80, 0.2);
 }
 

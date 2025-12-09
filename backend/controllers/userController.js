@@ -5,6 +5,7 @@ import {
   addUser,
   getUserById,
   getUserByEmail,
+  getUserByName,
   updateUser as updateUserInStorage,
   removeUser
 } from '../storage/userStorage.js';
@@ -23,6 +24,11 @@ export async function registerUser(userData) {
   const existingUser = getUserByEmail(email);
   if (existingUser) {
     throw new Error('User with this email already exists');
+  }
+
+  const existingName = getUserByName(name);
+  if (existingName) {
+    throw new Error('User with this name already exists');
   }
 
   // Create new user
@@ -94,8 +100,22 @@ export async function updateUserProfile(userId, profileData) {
 
   // Update fields if provided
   const updatedUser = { ...user };
-  if (name) updatedUser.name = name;
-  if (email) updatedUser.email = email;
+
+  if (name && name !== user.name) {
+    const existingName = getUserByName(name);
+    if (existingName) {
+      throw new Error('Username is already taken');
+    }
+    updatedUser.name = name;
+  }
+
+  if (email && email !== user.email) {
+    const existingUser = getUserByEmail(email);
+    if (existingUser) {
+      throw new Error('Email is already taken by another user');
+    }
+    updatedUser.email = email;
+  }
 
   const savedUser = updateUserInStorage(userId, updatedUser);
 
