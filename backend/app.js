@@ -2,6 +2,8 @@ import express from 'express';
 import { fetchVideos } from './controllers/videoController.js';
 import likesRouter from './routes/likes.js';
 import usersRouter from './routes/users.js';
+import adminRouter from './routes/adminRoutes.js';
+import uploadRouter from './routes/upload.js';
 import { configureApp } from './config/appConfig.js';
 
 const app = express();
@@ -16,6 +18,8 @@ app.get('/videos', fetchVideos);
 // API routes
 app.use('/api/likes', likesRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/upload', uploadRouter);
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on http://0.0.0.0:${PORT}`);

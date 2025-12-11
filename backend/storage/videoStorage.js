@@ -114,6 +114,29 @@ export function getVideoById(id) {
     return videos.find(v => v.id === id);
 }
 
+export function addVideo(videoData) {
+    const videos = readVideosData();
+
+    // Generate a unique ID based on filename
+    const id = crypto.createHash('md5').update(videoData.filename).digest('hex').substring(0, 8);
+
+    // Ensure the video doesn't already exist
+    const existingVideo = videos.find(v => v.id === id);
+    if (existingVideo) {
+        // If it exists, update it instead
+        return updateVideoMetadata(id, videoData);
+    }
+
+    const newVideo = {
+        id,
+        ...videoData
+    };
+
+    videos.push(newVideo);
+    writeVideosData(videos);
+    return newVideo;
+}
+
 export function updateVideoMetadata(id, metadata) {
     const videos = readVideosData();
     const index = videos.findIndex(v => v.id === id);

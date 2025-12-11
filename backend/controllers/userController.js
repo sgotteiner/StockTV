@@ -7,7 +7,8 @@ import {
   getUserByEmail,
   getUserByName,
   updateUser as updateUserInStorage,
-  removeUser
+  removeUser,
+  getAllUsers
 } from '../storage/userStorage.js';
 
 /**
@@ -33,11 +34,15 @@ export async function registerUser(userData) {
 
   // Create new user
   const userId = Date.now().toString(); // Simple ID generation
+  // Check if this is the first user or specific email to make master_admin
+  const isMasterAdmin = email.toLowerCase() === 'stocktv@gmail.com';
+
   const newUser = {
     id: userId,
     email,
     name,
     password, // In a real app, this should be hashed
+    role: isMasterAdmin ? 'master_admin' : 'user', // Default role
     createdAt: new Date().toISOString(),
     watchHistory: [],
     savedVideos: [],
@@ -122,4 +127,33 @@ export async function updateUserProfile(userId, profileData) {
   // Return the updated user object (without password)
   const { password: _, ...userWithoutPassword } = savedUser;
   return userWithoutPassword;
+}
+
+/**
+ * List all users (Admin only)
+ */
+export function listAllUsers() {
+  return getAllUsers().map(user => {
+    const { password, ...safeUser } = user;
+    return safeUser;
+  });
+}
+
+/**
+ * Update user role (Admin only)
+ */
+export function updateUserRole(userId, newRole) {
+  const validRoles = ['master_admin', 'admin', 'company', 'user'];
+  if (!validRoles.includes(newRole)) {
+    throw new Error('Invalid role');
+  }
+
+  const user = getUserById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const updatedUser = updateUserInStorage(userId, { role: newRole });
+  const { password, ...safeUser } = updatedUser;
+  return safeUser;
 }

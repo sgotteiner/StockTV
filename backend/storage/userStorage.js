@@ -29,6 +29,10 @@ export function getUsers() {
   }
 }
 
+export function getAllUsers() { // Alias for external use
+  return Object.values(getUsers());
+}
+
 export function saveUsers(usersData) {
   try {
     fs.writeFileSync(usersFilePath, JSON.stringify(usersData, null, 2));
