@@ -1,12 +1,12 @@
 import express from 'express';
 const router = express.Router();
 
-import * as likeController from '../controllers/likeController.js';
+import * as interactionController from '../controllers/interactionController.js';
 
 // Get like count for a video
 router.get('/videos/:videoId/likes', async (req, res) => {
   try {
-    const result = await likeController.getVideoLikeCount(req.params.videoId);
+    const result = await interactionController.getVideoLikeCount(req.params.videoId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -16,7 +16,7 @@ router.get('/videos/:videoId/likes', async (req, res) => {
 // Like a video
 router.post('/videos/:videoId/like', async (req, res) => {
   try {
-    const result = await likeController.likeVideo(req.params.videoId, req.body.userId);
+    const result = await interactionController.likeVideo(req.params.videoId, req.body.userId);
     res.json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -26,7 +26,7 @@ router.post('/videos/:videoId/like', async (req, res) => {
 // Unlike a video
 router.delete('/videos/:videoId/like', async (req, res) => {
   try {
-    const result = await likeController.unlikeVideo(req.params.videoId, req.body.userId);
+    const result = await interactionController.unlikeVideo(req.params.videoId, req.body.userId);
     res.json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -36,10 +36,20 @@ router.delete('/videos/:videoId/like', async (req, res) => {
 // Get user's liked videos
 router.get('/users/:userId/likes', async (req, res) => {
   try {
-    const result = await likeController.getUserLikedVideosList(req.params.userId);
+    const result = await interactionController.getUserLikedVideosList(req.params.userId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Record video view
+router.post('/videos/:videoId/views', async (req, res) => {
+  try {
+    const result = await interactionController.recordVideoView(req.params.videoId, req.body.userId);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 });
 

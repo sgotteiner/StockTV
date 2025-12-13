@@ -1,6 +1,7 @@
-import { listVideos } from '../storage/localStorage.js';
+import { getAllVideos } from '../storage/videoStorage.js';
 
 export function getVideos() {
-    // Minimal abstraction: can be swapped later
-    return listVideos();
+    // Service layer abstraction for video retrieval
+    // Can add business logic here if needed (filtering, sorting, etc.)
+    return getAllVideos();
 }

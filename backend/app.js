@@ -1,6 +1,6 @@
 import express from 'express';
 import { fetchVideos } from './controllers/videoController.js';
-import likesRouter from './routes/likes.js';
+import interactionsRouter from './routes/interactions.js';
 import usersRouter from './routes/users.js';
 import adminRouter from './routes/adminRoutes.js';
 import uploadRouter from './routes/upload.js';
@@ -16,7 +16,7 @@ configureApp(app);
 app.get('/videos', fetchVideos);
 
 // API routes
-app.use('/api/likes', likesRouter);
+app.use('/api/interactions', interactionsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/upload', uploadRouter);

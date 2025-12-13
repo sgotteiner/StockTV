@@ -1,10 +1,10 @@
-// API service for likes functionality
+// API service for user-video interactions (likes, views, etc.)
 import config from '../config';
 const BASE_URL = config.API_BASE_URL + '/api';
 
 export async function getVideoLikes(videoId) {
   try {
-    const response = await fetch(`${BASE_URL}/likes/videos/${videoId}/likes`);
+    const response = await fetch(`${BASE_URL}/interactions/videos/${videoId}/likes`);
     if (!response.ok) {
       throw new Error(`Failed to get likes: ${response.status}`);
     }
@@ -17,7 +17,7 @@ export async function getVideoLikes(videoId) {
 
 export async function likeVideo(videoId, userId) {
   try {
-    const response = await fetch(`${BASE_URL}/likes/videos/${videoId}/like`, {
+    const response = await fetch(`${BASE_URL}/interactions/videos/${videoId}/like`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ export async function likeVideo(videoId, userId) {
 
 export async function unlikeVideo(videoId, userId) {
   try {
-    const response = await fetch(`${BASE_URL}/likes/videos/${videoId}/like`, {
+    const response = await fetch(`${BASE_URL}/interactions/videos/${videoId}/like`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -59,13 +59,34 @@ export async function unlikeVideo(videoId, userId) {
 
 export async function getUserLikedVideos(userId) {
   try {
-    const response = await fetch(`${BASE_URL}/likes/users/${userId}/likes`);
+    const response = await fetch(`${BASE_URL}/interactions/users/${userId}/likes`);
     if (!response.ok) {
       throw new Error(`Failed to get user likes: ${response.status}`);
     }
     return await response.json();
   } catch (error) {
     console.error('Error fetching user likes:', error);
+    throw error;
+  }
+}
+
+export async function recordVideoView(videoId, userId) {
+  try {
+    const response = await fetch(`${BASE_URL}/interactions/videos/${videoId}/views`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to record view: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error recording video view:', error);
     throw error;
   }
 }

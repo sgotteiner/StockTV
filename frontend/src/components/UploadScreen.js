@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserProvider';
 import { uploadYouTubeVideo } from '../services/uploadApi';
-import { fetchUsers } from '../services/adminApi'; // Reusing admin API to get company list
 import '../styles/uploadStyles.css'; // Will create this stylesheet
 
 const UploadScreen = ({ onBack }) => {
@@ -13,38 +12,18 @@ const UploadScreen = ({ onBack }) => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  // Load companies based on user role
+  // Set company name based on user role
   useEffect(() => {
-    const loadCompanies = async () => {
-      if (currentUser?.role === 'admin' || currentUser?.role === 'master_admin') {
-        try {
-          const users = await fetchUsers();
-          // Get unique companies from user emails (domain part)
-          const userCompanies = [...new Set(
-            users
-              .filter(user => user.role === 'company')
-              .map(user => user.email.split('@')[1]?.split('.')[0] || 'unknown')
-          )].map(company => ({
-            id: company,
-            name: company.charAt(0).toUpperCase() + company.slice(1)
-          }));
-          
-          setCompanies(userCompanies);
-          if (userCompanies.length > 0) {
-            setSelectedCompany(userCompanies[0].id);
-          }
-        } catch (err) {
-          console.error('Error loading companies:', err);
-        }
-      } else if (currentUser?.role === 'company') {
-        // For company users, set their company to their user name
-        const companyName = currentUser.name;
-        setCompanies([{ id: companyName, name: companyName }]);
-        setSelectedCompany(companyName);
-      }
-    };
-
-    loadCompanies();
+    if (currentUser?.role === 'company') {
+      // For company users, set their company to their user name
+      setSelectedCompany(currentUser.name);
+    } else if (currentUser?.role === 'admin' || currentUser?.role === 'master_admin') {
+      // For admin users, initialize with empty string since they'll type company name
+      setSelectedCompany('');
+    } else {
+      // For any other case (like user role), also set to empty
+      setSelectedCompany('');
+    }
   }, [currentUser]);
 
   const handleSubmit = async (e) => {
@@ -105,30 +84,22 @@ const UploadScreen = ({ onBack }) => {
 
         {(canSelectCompany || isCompanyUser) && (
           <div className="form-group">
-            <label htmlFor="companySelect">
-              {isCompanyUser ? 'Your Company:' : 'Select Company:'}
+            <label htmlFor="companyInput">
+              {isCompanyUser ? 'Your Company:' : 'Company Name:'}
             </label>
             {isCompanyUser ? (
               <div className="readonly-company">
                 {selectedCompany ? selectedCompany.charAt(0).toUpperCase() + selectedCompany.slice(1) : 'Loading...'}
               </div>
             ) : (
-              <select
-                id="companySelect"
+              <input
+                type="text"
+                id="companyInput"
                 value={selectedCompany}
                 onChange={(e) => setSelectedCompany(e.target.value)}
-                className="form-select"
-                disabled={companies.length === 0}
-              >
-                {companies.map(company => (
-                  <option key={company.id} value={company.id}>
-                    {company.name}
-                  </option>
-                ))}
-              </select>
-            )}
-            {companies.length === 0 && canSelectCompany && (
-              <p className="no-companies-warning">No companies found. Create company accounts first.</p>
+                placeholder="Enter company name"
+                className="form-input"
+              />
             )}
           </div>
         )}

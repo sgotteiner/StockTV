@@ -2,6 +2,7 @@
 
 import { getUserById } from '../storage/userStorage.js';
 import { getAllVideos, updateVideoMetadata, addVideo } from '../storage/videoStorage.js';
+import { createCompany, getCompanyByName } from '../storage/companyStorage.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
@@ -22,11 +23,19 @@ if (!fs.existsSync(videosDir)) {
 /**
  * Download a YouTube video and save it to the appropriate company folder
  */
-export async function downloadYouTubeVideo(youtubeUrl, userId, requestedCompanyId) {
+export async function downloadYouTubeVideo(youtubeUrl, userId, companyNameOrId) {
   // Validate user
   const user = getUserById(userId);
   if (!user) throw new Error('User not found');
-  if (!requestedCompanyId) throw new Error('Company ID is required');
+  if (!companyNameOrId) throw new Error('Company name is required');
+
+  // Get or create company
+  let company = getCompanyByName(companyNameOrId);
+  if (!company) {
+    // Company doesn't exist, create it
+    company = createCompany(companyNameOrId);
+    console.log(`Created new company: ${company.name} (${company.id})`);
+  }
 
   // Validate YouTube URL format
   const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|shorts\/)|youtu\.be\/)[\w-]{11}(&.*)?$/;
@@ -80,7 +89,8 @@ export async function downloadYouTubeVideo(youtubeUrl, userId, requestedCompanyI
     // Update existing video metadata
     const updatedVideo = updateVideoMetadata(existingVideo.id, {
       title: videoInfo.title,
-      company: requestedCompanyId,
+      company: company.name,
+      company_id: company.id,
       date: new Date().toISOString().split('T')[0],
       description: videoInfo.description || '',
       uploader: userId
@@ -96,7 +106,8 @@ export async function downloadYouTubeVideo(youtubeUrl, userId, requestedCompanyI
       // Update newly created video with proper metadata
       const updatedVideo = updateVideoMetadata(newVideo.id, {
         title: videoInfo.title,
-        company: requestedCompanyId,
+        company: company.name,
+        company_id: company.id,
         date: new Date().toISOString().split('T')[0],
         description: videoInfo.description || '',
         uploader: userId
@@ -108,7 +119,8 @@ export async function downloadYouTubeVideo(youtubeUrl, userId, requestedCompanyI
       const newVideo = addVideo({
         filename: path.basename(filePath),
         title: videoInfo.title,
-        company: requestedCompanyId,
+        company: company.name,
+        company_id: company.id,
         date: new Date().toISOString().split('T')[0],
         description: videoInfo.description || '',
         uploader: userId,

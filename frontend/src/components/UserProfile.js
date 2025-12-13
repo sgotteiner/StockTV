@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import * as likesApi from '../services/likesApi';
+import * as interactionsApi from '../services/interactionsApi';
 import * as userProfileApi from '../services/userProfileApi';
 import { useUser } from '../context/UserProvider';
 import UploadScreen from './UploadScreen';
@@ -38,7 +38,7 @@ const UserProfile = ({ user, onLogout }) => {
     const fetchStats = async () => {
       if (user?.id) {
         try {
-          const likedData = await likesApi.getUserLikedVideos(user.id);
+          const likedData = await interactionsApi.getUserLikedVideos(user.id);
           setStats(prev => ({
             ...prev,
             liked: likedData.likedVideos ? likedData.likedVideos.length : 0
