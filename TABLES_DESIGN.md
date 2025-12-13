@@ -83,25 +83,37 @@
 
 ---
 
-## Feed Algorithm (Simple)
+---
+
+## Feed Algorithm (✅ IMPLEMENTED)
+
+**Location:** `backend/services/feedService.js`
 
 ```javascript
-function getFeed(userId, page = 1, limit = 20) {
-  // 1. Get unwatched videos
-  const watchedIds = interactions
-    .filter(i => i.user_id === userId && i.viewed)
-    .map(i => i.video_id);
+function getPersonalizedFeed(userId) {
+  // 1. Get unwatched videos (sorted by created_at DESC - newest first)
+  const unwatchedVideos = videos
+    .filter(v => !hasInteraction(userId, v.id))
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   
-  const unwatched = videos.filter(v => !watchedIds.includes(v.id));
+  // 2. Get watched videos (sorted by viewed_at ASC - oldest first, encourages scrolling)
+  const watchedVideos = videos
+    .filter(v => hasInteraction(userId, v.id))
+    .sort((a, b) => new Date(a.viewed_at) - new Date(b.viewed_at));
   
-  // 2. Sort newest first
-  unwatched.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  
-  // 3. Paginate
-  const start = (page - 1) * limit;
-  return unwatched.slice(start, start + limit);
+  // 3. Combine: unwatched first, then watched
+  return [...unwatchedVideos, ...watchedVideos];
 }
 ```
+
+**Features:**
+- ✅ Personalized per user
+- ✅ Unwatched videos prioritized
+- ✅ Watched videos appear after unwatched (oldest first - encourages scrolling to discover more)
+- ✅ Auto-updates when user logs in/out
+- ✅ Pagination with infinite scroll (configurable via constants.js)
+- ✅ Centralized configuration (change page size in one place)
+
 
 ---
 
