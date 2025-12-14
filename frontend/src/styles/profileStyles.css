@@ -176,8 +176,7 @@
   margin-top: var(--spacing-xs);
 }
 
-/* Stats Row - Perfect Thirds */
-/* Stats Row - Perfect Thirds */
+/* Stats Row - 4 stats */
 .profile-stats {
   display: flex;
   justify-content: space-between;
@@ -193,8 +192,8 @@
 .stat-item {
   display: flex;
   flex-direction: column;
-  width: 33.33%;
-  /* Force square aspect ratio based on width */
+  width: 25%;
+  /* 4 stats = 25% each */
   aspect-ratio: 1 / 1;
   padding: 0;
   box-sizing: border-box;
@@ -289,4 +288,88 @@
   opacity: 1;
   transform: none;
   text-decoration: underline;
+}
+
+/* Admin Panel Tabs */
+.admin-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #333;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #888;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-button:hover {
+  color: #fff;
+}
+
+.tab-button.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* Company Management */
+.website-input {
+  width: 100%;
+  padding: 8px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.website-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.edit-btn,
+.save-btn,
+.cancel-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-right: 5px;
+  transition: all 0.2s;
+}
+
+.edit-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.edit-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.save-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #45a049;
+}
+
+.cancel-btn {
+  background: #f44336;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #da190b;
 }

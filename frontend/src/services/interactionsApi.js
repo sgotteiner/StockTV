@@ -90,3 +90,58 @@ export async function recordVideoView(videoId, userId) {
     throw error;
   }
 }
+
+export async function saveVideo(videoId, userId) {
+  try {
+    const response = await fetch(`${BASE_URL}/interactions/videos/${videoId}/save`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to save video: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error saving video:', error);
+    throw error;
+  }
+}
+
+export async function unsaveVideo(videoId, userId) {
+  try {
+    const response = await fetch(`${BASE_URL}/interactions/videos/${videoId}/save`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to unsave video: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error unsaving video:', error);
+    throw error;
+  }
+}
+
+export async function getUserSavedVideos(userId) {
+  try {
+    const response = await fetch(`${BASE_URL}/interactions/users/${userId}/saved`);
+    if (!response.ok) {
+      throw new Error(`Failed to get saved videos: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching saved videos:', error);
+    throw error;
+  }
+}

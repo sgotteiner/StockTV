@@ -1,5 +1,5 @@
-import config from './config';
-import { PAGINATION } from './constants';
+import config from '../config';
+import { PAGINATION } from '../constants';
 
 export async function getVideos(userId = null, page = PAGINATION.DEFAULT_PAGE, limit = PAGINATION.DEFAULT_PAGE_SIZE) {
     let backendUrl = config.API_BASE_URL + '/videos';

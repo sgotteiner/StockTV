@@ -1,42 +1,51 @@
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { readJSON, writeJSON, generateId } from '../utils/fileIO.js';
+import { getAllVideos } from './videoStorage.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const dataPath = path.join(__dirname, '../data/companies.json');
 
-// Read companies
-function readCompanies() {
-    const data = fs.readFileSync(dataPath, 'utf8');
-    return JSON.parse(data);
-}
+/**
+ * Company Storage Module
+ * Handles company data and operations
+ */
 
-// Write companies
-function writeCompanies(data) {
-    fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf8');
-}
+// Helper: Read companies
+const readCompanies = () => readJSON(dataPath, { companies: [] });
 
-// Get all companies
+// Helper: Write companies
+const writeCompanies = (data) => writeJSON(dataPath, data);
+
+/**
+ * Get all companies
+ */
 export function getAllCompanies() {
     const data = readCompanies();
     return data.companies || [];
 }
 
-// Get company by ID
+/**
+ * Get company by ID
+ */
 export function getCompanyById(id) {
     const companies = getAllCompanies();
     return companies.find(c => c.id === id);
 }
 
-// Get company by name
+/**
+ * Get company by name
+ */
 export function getCompanyByName(name) {
     const companies = getAllCompanies();
     return companies.find(c => c.name.toLowerCase() === name.toLowerCase());
 }
 
-// Create new company
-export function createCompany(name) {
+/**
+ * Create new company
+ */
+export function createCompany(name, website = '') {
     const data = readCompanies();
     const companies = data.companies || [];
 
@@ -46,12 +55,10 @@ export function createCompany(name) {
         return existing;
     }
 
-    // Generate random hash ID (like videos and users)
-    const id = Math.random().toString(36).substring(2, 10);
-
     const newCompany = {
-        id,
+        id: generateId('comp_'),
         name: name.charAt(0).toUpperCase() + name.slice(1),
+        website: website || '',
         created_at: new Date().toISOString()
     };
 
@@ -59,4 +66,48 @@ export function createCompany(name) {
     writeCompanies({ companies });
 
     return newCompany;
+}
+
+/**
+ * Update company website
+ */
+export function updateCompanyWebsite(companyId, website) {
+    const data = readCompanies();
+    const companies = data.companies || [];
+
+    const company = companies.find(c => c.id === companyId);
+    if (!company) {
+        throw new Error('Company not found');
+    }
+
+    company.website = website;
+    writeCompanies({ companies });
+
+    return company;
+}
+
+/**
+ * Update company by name (for backward compatibility)
+ */
+export function updateCompanyByName(companyName, updates) {
+    const data = readCompanies();
+    const companies = data.companies || [];
+
+    const company = companies.find(c => c.name.toLowerCase() === companyName.toLowerCase());
+    if (!company) {
+        throw new Error('Company not found');
+    }
+
+    Object.assign(company, updates);
+    writeCompanies({ companies });
+
+    return company;
+}
+
+/**
+ * Get company video count
+ */
+export function getCompanyVideoCount(companyId) {
+    const videos = getAllVideos();
+    return videos.filter(v => v.company_id === companyId).length;
 }

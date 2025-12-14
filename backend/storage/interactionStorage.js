@@ -1,76 +1,49 @@
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { readJSON, writeJSON, generateId } from '../utils/fileIO.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const dataPath = path.join(__dirname, '../data/user_video_interactions.json');
 
-// Read interactions
-function readInteractions() {
-    const data = fs.readFileSync(dataPath, 'utf8');
-    return JSON.parse(data);
-}
+/**
+ * Interaction Storage Module
+ * Handles all user-video interaction data (views, likes, saves, shares)
+ */
 
-// Write interactions
-function writeInteractions(data) {
-    fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf8');
-}
+// Helper: Read interactions
+const readInteractions = () => readJSON(dataPath, { interactions: [] });
 
-// Generate unique ID
-function generateId() {
-    return `int_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
+// Helper: Write interactions
+const writeInteractions = (data) => writeJSON(dataPath, data);
 
-// Get or create interaction record
-function getOrCreateInteraction(userId, videoId) {
-    const data = readInteractions();
-    const interactions = data.interactions || [];
+// Helper: Create new interaction object
+const createInteraction = (userId, videoId, liked = false) => ({
+    id: generateId('int_'),
+    user_id: userId,
+    video_id: videoId,
+    liked,
+    viewed_at: new Date().toISOString(),
+    watch_percentage: 0,
+    saved: false,
+    shared_with: []
+});
 
-    let interaction = interactions.find(i =>
-        i.user_id === userId && i.video_id === videoId
-    );
+// Helper: Find interaction
+const findInteraction = (interactions, userId, videoId) =>
+    interactions.find(i => i.user_id === userId && i.video_id === videoId);
 
-    if (!interaction) {
-        interaction = {
-            id: generateId(),
-            user_id: userId,
-            video_id: videoId,
-            liked: false,
-            viewed_at: new Date().toISOString(),
-            watch_percentage: 0,  // Track video watch progress (0-100)
-            saved: false,  // Save for later functionality
-            shared_with: []  // Array of user IDs that this was shared with
-        };
-        interactions.push(interaction);
-        writeInteractions({ interactions });
-        return interaction;
-    }
-
-    // Return a copy to ensure we're working with fresh data
-    return { ...interaction };
-}
-
-// Record video view
+/**
+ * Record video view
+ */
 export function recordView(userId, videoId, watchData) {
     const data = readInteractions();
     const interactions = data.interactions || [];
 
-    let interaction = interactions.find(i =>
-        i.user_id === userId && i.video_id === videoId
-    );
+    let interaction = findInteraction(interactions, userId, videoId);
 
     if (!interaction) {
-        interaction = {
-            id: generateId(),
-            user_id: userId,
-            video_id: videoId,
-            liked: false,
-            viewed_at: new Date().toISOString(),
-            watch_percentage: 0,  // Track video watch progress (0-100)
-            saved: false,  // Save for later functionality
-            shared_with: []  // Array of user IDs that this was shared with
-        };
+        interaction = createInteraction(userId, videoId);
         interactions.push(interaction);
     }
 
@@ -78,43 +51,34 @@ export function recordView(userId, videoId, watchData) {
     return interaction;
 }
 
-// Get all interactions for a user
+/**
+ * Get all interactions for a user
+ */
 export function getUserInteractions(userId) {
     const data = readInteractions();
-    const interactions = data.interactions || [];
-    return interactions.filter(i => i.user_id === userId);
+    return (data.interactions || []).filter(i => i.user_id === userId);
 }
 
-// Get viewed videos for a user
+/**
+ * Get viewed videos for a user
+ */
 export function getViewedVideos(userId) {
-    const interactions = getUserInteractions(userId);
-    return interactions.map(i => i.video_id); // All interactions represent viewed videos
+    return getUserInteractions(userId).map(i => i.video_id);
 }
 
-// Like a video
+/**
+ * Like a video
+ */
 export function likeVideo(userId, videoId) {
     const data = readInteractions();
     const interactions = data.interactions || [];
 
-    let interaction = interactions.find(i =>
-        i.user_id === userId && i.video_id === videoId
-    );
+    let interaction = findInteraction(interactions, userId, videoId);
 
     if (!interaction) {
-        // If no interaction exists, create one (user must have viewed to like)
-        interaction = {
-            id: generateId(),
-            user_id: userId,
-            video_id: videoId,
-            liked: true,
-            viewed_at: new Date().toISOString(),
-            watch_percentage: 0,  // Track video watch progress (0-100)
-            saved: false,  // Save for later functionality
-            shared_with: []  // Array of user IDs that this was shared with
-        };
+        interaction = createInteraction(userId, videoId, true);
         interactions.push(interaction);
     } else {
-        // Update existing interaction
         interaction.liked = true;
     }
 
@@ -122,31 +86,19 @@ export function likeVideo(userId, videoId) {
     return interaction;
 }
 
-// Unlike a video
+/**
+ * Unlike a video
+ */
 export function unlikeVideo(userId, videoId) {
     const data = readInteractions();
     const interactions = data.interactions || [];
 
-    let interaction = interactions.find(i =>
-        i.user_id === userId && i.video_id === videoId
-    );
+    let interaction = findInteraction(interactions, userId, videoId);
 
     if (!interaction) {
-        // If no interaction exists, create one with liked: false
-        // This would be unusual (unliking without previous interaction), but handle gracefully
-        interaction = {
-            id: generateId(),
-            user_id: userId,
-            video_id: videoId,
-            liked: false,
-            // Don't set viewed_at here as it's not related to the unlike action
-            watch_percentage: 0,  // Track video watch progress (0-100)
-            saved: false,  // Save for later functionality
-            shared_with: []  // Array of user IDs that this was shared with
-        };
+        interaction = createInteraction(userId, videoId, false);
         interactions.push(interaction);
     } else {
-        // Update existing interaction - only change the liked status
         interaction.liked = false;
     }
 
@@ -154,20 +106,76 @@ export function unlikeVideo(userId, videoId) {
     return interaction;
 }
 
-// Get like count for a video
+/**
+ * Get like count for a video
+ */
 export function getVideoLikeCount(videoId) {
     const data = readInteractions();
     const interactions = data.interactions || [];
-    const likedInteractions = interactions.filter(i => i.video_id === videoId && i.liked);
-    return likedInteractions.length;
+    return interactions.filter(i => i.video_id === videoId && i.liked).length;
 }
 
-// Get user's liked videos
+/**
+ * Get user's liked videos
+ */
 export function getUserLikedVideos(userId) {
     const data = readInteractions();
     const interactions = data.interactions || [];
-    const userInteractions = interactions.filter(i => i.user_id === userId && i.liked);
-    return userInteractions.map(i => ({
-        videoId: i.video_id
-    }));
+    return interactions
+        .filter(i => i.user_id === userId && i.liked)
+        .map(i => ({ videoId: i.video_id }));
 }
+
+/**
+ * Save a video
+ */
+export function saveVideo(userId, videoId) {
+    const data = readInteractions();
+    const interactions = data.interactions || [];
+
+    let interaction = findInteraction(interactions, userId, videoId);
+
+    if (!interaction) {
+        interaction = createInteraction(userId, videoId);
+        interaction.saved = true;
+        interactions.push(interaction);
+    } else {
+        interaction.saved = true;
+    }
+
+    writeInteractions({ interactions });
+    return interaction;
+}
+
+/**
+ * Unsave a video
+ */
+export function unsaveVideo(userId, videoId) {
+    const data = readInteractions();
+    const interactions = data.interactions || [];
+
+    let interaction = findInteraction(interactions, userId, videoId);
+
+    if (!interaction) {
+        interaction = createInteraction(userId, videoId);
+        interaction.saved = false;
+        interactions.push(interaction);
+    } else {
+        interaction.saved = false;
+    }
+
+    writeInteractions({ interactions });
+    return interaction;
+}
+
+/**
+ * Get user's saved videos
+ */
+export function getUserSavedVideos(userId) {
+    const data = readInteractions();
+    const interactions = data.interactions || [];
+    return interactions
+        .filter(i => i.user_id === userId && i.saved)
+        .map(i => ({ videoId: i.video_id }));
+}
+

@@ -52,14 +52,37 @@ export async function getUserLikedVideosList(userId) {
 
 // Record video view
 export async function recordVideoView(videoId, userId) {
+  // userId can be null for guest users
+  if (!userId) {
+    return { message: 'View not recorded (guest user)' };
+  }
+
+  interactionStorage.recordView(userId, videoId);
+  return { message: 'View recorded successfully' };
+}
+
+// Save a video
+export async function saveVideo(videoId, userId) {
   if (!userId) {
     throw new Error('User ID is required');
   }
 
-  const interaction = await interactionStorage.recordView(userId, videoId, { watch_percentage: 100 }); // Simplified
-  return {
-    videoId,
-    userId,
-    success: true
-  };
+  interactionStorage.saveVideo(userId, videoId);
+  return { message: 'Video saved successfully', saved: true };
+}
+
+// Unsave a video
+export async function unsaveVideo(videoId, userId) {
+  if (!userId) {
+    throw new Error('User ID is required');
+  }
+
+  interactionStorage.unsaveVideo(userId, videoId);
+  return { message: 'Video unsaved successfully', saved: false };
+}
+
+// Get user's saved videos
+export async function getUserSavedVideos(userId) {
+  const savedVideos = interactionStorage.getUserSavedVideos(userId);
+  return { savedVideos };
 }
