@@ -87,7 +87,6 @@ export async function downloadYouTubeVideo(youtubeUrl, userId, companyNameOrId) 
   if (existingVideo) {
     const updatedVideo = updateVideoMetadata(existingVideo.id, {
       title: videoInfo.title,
-      company: company.name,
       company_id: company.id,
       date: new Date().toISOString().split('T')[0],
       description: videoInfo.description || '',
@@ -101,7 +100,6 @@ export async function downloadYouTubeVideo(youtubeUrl, userId, companyNameOrId) 
     if (newVideo) {
       const updatedVideo = updateVideoMetadata(newVideo.id, {
         title: videoInfo.title,
-        company: company.name,
         company_id: company.id,
         date: new Date().toISOString().split('T')[0],
         description: videoInfo.description || '',
@@ -112,7 +110,6 @@ export async function downloadYouTubeVideo(youtubeUrl, userId, companyNameOrId) 
       const createdVideo = addVideo({
         filename: path.basename(filePath),
         title: videoInfo.title,
-        company: company.name,
         company_id: company.id,
         date: new Date().toISOString().split('T')[0],
         description: videoInfo.description || '',
@@ -153,7 +150,6 @@ export async function uploadVideoFile(file, userId, companyNameOrId) {
     const newVideo = addVideo({
       filename: file.filename,
       title: file.originalname.replace(path.extname(file.originalname), ''),
-      company: company.name,
       company_id: company.id,
       date: new Date().toISOString().split('T')[0],
       description: `Uploaded by ${user.name}`,
@@ -208,7 +204,6 @@ export async function uploadVideoFromUrl(videoUrl, userId, companyNameOrId) {
     const newVideo = addVideo({
       filename: filename,
       title: title || 'Video from URL',
-      company: company.name,
       company_id: company.id,
       date: new Date().toISOString().split('T')[0],
       description: `Downloaded from ${videoUrl}`,

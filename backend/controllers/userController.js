@@ -43,10 +43,7 @@ export async function registerUser(userData) {
     name,
     password, // In a real app, this should be hashed
     role: isMasterAdmin ? 'master_admin' : 'user', // Default role
-    createdAt: new Date().toISOString(),
-    watchHistory: [],
-    savedVideos: [],
-    likedVideos: [] // Track liked videos on the user
+    createdAt: new Date().toISOString()
   };
 
   addUser(newUser);

@@ -1,12 +1,14 @@
 import { getAllVideos } from '../storage/videoStorage.js';
 import { getUserInteractions } from '../storage/interactionStorage.js';
+import { getUserFollowedCompanies } from '../storage/companyFollowStorage.js';
 import { PAGINATION } from '../config/constants.js';
 
 /**
  * Get personalized feed for a user
  * Algorithm:
- * 1. Unwatched videos first (sorted by created_at DESC - newest first)
- * 2. Watched videos second (sorted by viewed_at ASC - oldest first, encourages scrolling to unwatched)
+ * 1. Unwatched videos from FOLLOWED companies (sorted by created_at DESC - newest first)
+ * 2. Unwatched videos from OTHER companies (sorted by created_at DESC - newest first)
+ * 3. Watched videos (sorted by viewed_at ASC - oldest first, encourages scrolling to unwatched)
  * 
  * @param {string} userId - User ID (optional, if null returns all videos by created_at)
  * @param {number} page - Page number (1-indexed, default: 1)
@@ -24,8 +26,12 @@ export function getPersonalizedFeed(userId, page = PAGINATION.DEFAULT_PAGE, limi
         return paginateResults(sortedVideos, page, limit);
     }
 
-    // Get user's interactions
+    // Get user's interactions and followed companies
     const userInteractions = getUserInteractions(userId);
+    const followedCompanies = getUserFollowedCompanies(userId);
+
+    // Create a set of followed company IDs for quick lookup
+    const followedCompanyIds = new Set(followedCompanies.map(fc => fc.companyId));
 
     // Create a map of video_id -> interaction for quick lookup
     const interactionMap = new Map();
@@ -33,12 +39,14 @@ export function getPersonalizedFeed(userId, page = PAGINATION.DEFAULT_PAGE, limi
         interactionMap.set(interaction.video_id, interaction);
     });
 
-    // Separate videos into watched and unwatched
-    const unwatchedVideos = [];
+    // Separate videos into categories
+    const unwatchedFollowed = [];
+    const unwatchedOther = [];
     const watchedVideos = [];
 
     allVideos.forEach(video => {
         const interaction = interactionMap.get(video.id);
+        const isFollowed = followedCompanyIds.has(video.company_id);
 
         if (interaction) {
             // Video has been watched
@@ -48,13 +56,21 @@ export function getPersonalizedFeed(userId, page = PAGINATION.DEFAULT_PAGE, limi
                 liked: interaction.liked
             });
         } else {
-            // Video hasn't been watched
-            unwatchedVideos.push(video);
+            // Video hasn't been watched - prioritize by follow status
+            if (isFollowed) {
+                unwatchedFollowed.push(video);
+            } else {
+                unwatchedOther.push(video);
+            }
         }
     });
 
-    // Sort unwatched videos by created_at (newest first)
-    unwatchedVideos.sort((a, b) =>
+    // Sort all categories by created_at (newest first)
+    unwatchedFollowed.sort((a, b) =>
+        new Date(b.created_at || 0) - new Date(a.created_at || 0)
+    );
+
+    unwatchedOther.sort((a, b) =>
         new Date(b.created_at || 0) - new Date(a.created_at || 0)
     );
 
@@ -63,8 +79,8 @@ export function getPersonalizedFeed(userId, page = PAGINATION.DEFAULT_PAGE, limi
         new Date(a.viewed_at || 0) - new Date(b.viewed_at || 0)
     );
 
-    // Combine: unwatched first, then watched
-    const combinedFeed = [...unwatchedVideos, ...watchedVideos];
+    // Combine: followed unwatched first, then other unwatched, then watched
+    const combinedFeed = [...unwatchedFollowed, ...unwatchedOther, ...watchedVideos];
 
     return paginateResults(combinedFeed, page, limit);
 }
