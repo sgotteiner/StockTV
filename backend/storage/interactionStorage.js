@@ -176,6 +176,6 @@ export function getUserSavedVideos(userId) {
     const interactions = data.interactions || [];
     return interactions
         .filter(i => i.user_id === userId && i.saved)
-        .map(i => ({ videoId: i.video_id }));
+        .map(i => ({ video_id: i.video_id }));
 }
 

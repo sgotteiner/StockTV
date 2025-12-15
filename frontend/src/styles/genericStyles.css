@@ -59,12 +59,10 @@ main {
 
 .loading {
   color: #666;
-  /* TODO: Add secondary text color token */
 }
 
 .error {
   color: #d32f2f;
-  /* TODO: Add error color token */
 }
 
 /* Avatar Placeholder Styles */
@@ -112,6 +110,5 @@ main {
 .stat-label {
   font-size: var(--font-size-sm);
   color: #aaa;
-  /* TODO: Add muted text color token */
   margin-top: var(--spacing-xs);
 }

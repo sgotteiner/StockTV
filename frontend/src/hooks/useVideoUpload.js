@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { uploadYouTubeVideo, uploadVideoFile, uploadVideoUrl } from '../services/uploadApi';
+import { UPLOAD_CONFIG } from '../config/upload.config';
 
 /**
  * Custom hook for video upload logic

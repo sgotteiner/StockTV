@@ -61,7 +61,8 @@ export async function isFollowingCompany(companyId, userId) {
             throw new Error(`Failed to check follow status: ${response.status}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        return data.isFollowing;
     } catch (error) {
         console.error('Error checking follow status:', error);
         throw error;

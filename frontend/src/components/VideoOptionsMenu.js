@@ -1,130 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { getCompanyByName } from '../services/companyApi';
-import { saveVideo, unsaveVideo } from '../services/interactionsApi';
-import { followCompany, unfollowCompany, isFollowingCompany } from '../services/companyFollowApi';
-import '../App.css';
+import React from 'react';
+import { useVideoSave } from '../hooks/useVideoSave';
+import { useCompanyFollow } from '../hooks/useCompanyFollow';
+import '../styles/videoOptionsStyles.css';
 
 /**
  * VideoOptionsMenu Component
- * Modular options menu for video actions
- * Easily extensible for future options
+ * Displays a menu of actions for a video (save, follow company, share, etc.)
+ * PURE UI - All business logic in hooks
  */
-const VideoOptionsMenu = ({ video, onClose, currentUser }) => {
-    const [message, setMessage] = useState('');
-    const [companyWebsite, setCompanyWebsite] = useState(null);
-    const [companyData, setCompanyData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [isSaved, setIsSaved] = useState(false);
-    const [isFollowing, setIsFollowing] = useState(false);
+const VideoOptionsMenu = ({ video, currentUser, onClose }) => {
+    // Use custom hooks for ALL business logic
+    const { isSaved, toggleSave, shareVideo, message: saveMessage } = useVideoSave(video, currentUser);
+    const {
+        isFollowing,
+        toggleFollow,
+        goToWebsite,
+        companyName,
+        companyWebsite,
+        loading,
+        message: followMessage
+    } = useCompanyFollow(video.company_id, currentUser);
 
-    // Fetch company data and check follow status
-    useEffect(() => {
-        const fetchData = async () => {
-            if (video.company) {
-                try {
-                    const company = await getCompanyByName(video.company);
-                    setCompanyWebsite(company.website);
-                    setCompanyData(company);
+    // Combined message from both hooks
+    const message = saveMessage || followMessage;
 
-                    // Check if following
-                    if (currentUser) {
-                        const followStatus = await isFollowingCompany(company.id, currentUser.id);
-                        setIsFollowing(followStatus.isFollowing);
-                    }
-                } catch (error) {
-                    console.error('Error fetching company:', error);
-                    setCompanyData(null);
-                    setCompanyWebsite(null);
-                } finally {
-                    setLoading(false);
-                }
-            } else {
-                setLoading(false);
-            }
-        };
+    // Handler wrappers that call hook functions
+    const handleSave = async () => {
+        await toggleSave();
+    };
 
-        fetchData();
-    }, [video.company, currentUser]);
-
-    // Check if video is saved
-    useEffect(() => {
-        // TODO: Add API endpoint to check if video is saved
-        // For now, we'll just track it locally after save/unsave
-        setIsSaved(false);
-    }, [video.id, currentUser]);
-
-    const handleToggleSave = async () => {
-        if (!currentUser) {
-            setMessage('Please log in to save videos');
-            setTimeout(() => setMessage(''), 2000);
-            return;
-        }
-
-        try {
-            if (isSaved) {
-                await unsaveVideo(video.id, currentUser.id);
-                setIsSaved(false);
-                setMessage('Video unsaved!');
-            } else {
-                await saveVideo(video.id, currentUser.id);
-                setIsSaved(true);
-                setMessage('Video saved!');
-            }
-            setTimeout(() => {
-                setMessage('');
-            }, 1500);
-        } catch (error) {
-            setMessage('Failed to update save status');
-            setTimeout(() => setMessage(''), 2000);
-        }
+    const handleFollow = async () => {
+        await toggleFollow();
     };
 
     const handleGoToWebsite = () => {
-        if (companyWebsite) {
-            window.open(companyWebsite, '_blank');
+        const result = goToWebsite();
+        if (result.success) {
             onClose();
-        } else {
-            setMessage('No website available for this company');
-            setTimeout(() => setMessage(''), 2000);
-        }
-    };
-
-    const handleToggleFollow = async () => {
-        if (!currentUser) {
-            setMessage('Please log in to follow companies');
-            setTimeout(() => setMessage(''), 2000);
-            return;
-        }
-
-        if (!companyData) {
-            setMessage('Company information not available');
-            setTimeout(() => setMessage(''), 2000);
-            return;
-        }
-
-        try {
-            if (isFollowing) {
-                await unfollowCompany(companyData.id, currentUser.id);
-                setIsFollowing(false);
-                setMessage(`Unfollowed ${video.company}`);
-            } else {
-                await followCompany(companyData.id, currentUser.id);
-                setIsFollowing(true);
-                setMessage(`Now following ${video.company}!`);
-            }
-            setTimeout(() => {
-                setMessage('');
-            }, 1500);
-        } catch (error) {
-            setMessage('Failed to update follow status');
-            setTimeout(() => setMessage(''), 2000);
         }
     };
 
     const handleShare = () => {
-        // TODO: Implement share functionality
-        setMessage('Share feature coming soon!');
-        setTimeout(() => setMessage(''), 2000);
+        shareVideo();
     };
 
     const options = [
@@ -132,29 +49,29 @@ const VideoOptionsMenu = ({ video, onClose, currentUser }) => {
             id: 'save',
             label: isSaved ? 'Unsave Video' : 'Save Video',
             icon: isSaved ? '✓' : '🔖',
-            action: handleToggleSave,
-            show: !!currentUser // Only show if logged in
+            action: handleSave,
+            show: true
         },
         {
             id: 'follow',
-            label: isFollowing ? `Unfollow ${video.company}` : `Follow ${video.company || 'Company'}`,
+            label: isFollowing ? `Unfollow ${companyName}` : `Follow ${companyName}`,
             icon: isFollowing ? '✓' : '➕',
-            action: handleToggleFollow,
-            show: !!currentUser && !!video.company // Only show if logged in and has company
+            action: handleFollow,
+            show: !loading && companyName
         },
         {
             id: 'website',
             label: 'Go to Website',
             icon: '🌐',
             action: handleGoToWebsite,
-            show: true // Always show
+            show: !loading && companyWebsite
         },
         {
             id: 'share',
             label: 'Share Video',
             icon: '📤',
             action: handleShare,
-            show: true // Always show
+            show: true
         }
     ];
 
@@ -166,31 +83,24 @@ const VideoOptionsMenu = ({ video, onClose, currentUser }) => {
                     <button className="close-button" onClick={onClose}>✕</button>
                 </div>
 
-                {loading ? (
-                    <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
-                        Loading...
-                    </div>
-                ) : (
-                    <div className="options-list">
-                        {options
-                            .filter(option => option.show)
-                            .map(option => (
-                                <button
-                                    key={option.id}
-                                    className="option-item"
-                                    onClick={option.action}
-                                >
-                                    <span className="option-icon">{option.icon}</span>
-                                    <span className="option-label">{option.label}</span>
-                                </button>
-                            ))
-                        }
+                {message && (
+                    <div className="options-message">
+                        {message}
                     </div>
                 )}
 
-                {message && (
-                    <div className="option-message">{message}</div>
-                )}
+                <div className="options-list">
+                    {options.filter(opt => opt.show).map(option => (
+                        <button
+                            key={option.id}
+                            className="option-item"
+                            onClick={option.action}
+                        >
+                            <span className="option-icon">{option.icon}</span>
+                            <span className="option-label">{option.label}</span>
+                        </button>
+                    ))}
+                </div>
             </div>
         </div>
     );

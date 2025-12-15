@@ -1,10 +1,6 @@
 import multer from 'multer';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { ensureDir } from './fileIO.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { UPLOAD_CONFIG } from '../config/upload.config.js';
 
 /**
  * File Upload Utilities
@@ -14,9 +10,8 @@ const __dirname = path.dirname(__filename);
 // Configure storage
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadDir = path.join(__dirname, '../uploads/videos');
-        ensureDir(uploadDir);
-        cb(null, uploadDir);
+        ensureDir(UPLOAD_CONFIG.TEMP_UPLOAD_DIR);
+        cb(null, UPLOAD_CONFIG.TEMP_UPLOAD_DIR);
     },
     filename: (req, file, cb) => {
         // Use original filename
@@ -26,12 +21,11 @@ const storage = multer.diskStorage({
 
 // File filter - only allow video files
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
-
-    if (allowedTypes.includes(file.mimetype)) {
+    if (UPLOAD_CONFIG.ALLOWED_MIME_TYPES.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error('Invalid file type. Only MP4, WebM, OGG, and MOV files are allowed.'), false);
+        const allowedTypes = UPLOAD_CONFIG.ALLOWED_MIME_TYPES.join(', ');
+        cb(new Error(`Invalid file type. Allowed types: ${allowedTypes}`), false);
     }
 };
 
@@ -40,7 +34,7 @@ export const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
     limits: {
-        fileSize: 100 * 1024 * 1024 // 100MB limit
+        fileSize: UPLOAD_CONFIG.MAX_FILE_SIZE
     }
 });
 

@@ -1,8 +1,14 @@
 // UploadController.js - Business logic for video upload operations
 
-import { getUserById } from '../storage/userStorage.js';
-import { getAllVideos, updateVideoMetadata, addVideo } from '../storage/videoStorage.js';
-import { createCompany, getCompanyByName } from '../storage/companyStorage.js';
+import { getAllVideos, updateVideoMetadata } from '../storage/videoStorage.js';
+import {
+  validateUploadRequest,
+  getOrCreateCompany,
+  createVideoRecord,
+  extractTitleFromFilename,
+  extractTitleFromUrl
+} from '../utils/uploadHelpers.js';
+import { UPLOAD_CONFIG } from '../config/upload.config.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
@@ -12,33 +18,28 @@ import ffmpegPath from '@ffmpeg-installer/ffmpeg';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Directory for storing uploaded videos
-const videosDir = path.resolve(__dirname, '../../videos');
-
 // Ensure directories exist
-if (!fs.existsSync(videosDir)) {
-  fs.mkdirSync(videosDir, { recursive: true });
+if (!fs.existsSync(UPLOAD_CONFIG.VIDEOS_DIR)) {
+  fs.mkdirSync(UPLOAD_CONFIG.VIDEOS_DIR, { recursive: true });
 }
 
 /**
- * Download a YouTube video and save it to the appropriate company folder
+ * Download a YouTube video
  */
 export async function downloadYouTubeVideo(youtubeUrl, userId, companyNameOrId) {
-  // Validate user
-  const user = getUserById(userId);
-  if (!user) throw new Error('User not found');
-  if (!companyNameOrId) throw new Error('Company name is required');
-
-  // Get or create company
-  let company = getCompanyByName(companyNameOrId);
-  if (!company) {
-    company = createCompany(companyNameOrId);
-    console.log(`Created new company: ${company.name} (${company.id})`);
+  // Validate request
+  const validation = validateUploadRequest(userId, companyNameOrId);
+  if (!validation.isValid) {
+    throw new Error(validation.error);
   }
 
-  // Validate YouTube URL format
-  const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|shorts\/)|youtu\.be\/)[\w-]{11}(&.*)?$/;
-  if (!youtubeRegex.test(youtubeUrl)) throw new Error('Invalid YouTube URL');
+  // Validate YouTube URL
+  if (!UPLOAD_CONFIG.YOUTUBE_REGEX.test(youtubeUrl)) {
+    throw new Error('Invalid YouTube URL');
+  }
+
+  // Get or create company
+  const company = getOrCreateCompany(companyNameOrId);
 
   let videoInfo;
   let filePath;
@@ -51,113 +52,79 @@ export async function downloadYouTubeVideo(youtubeUrl, userId, companyNameOrId) 
     });
 
     // Handle response format
-    if (typeof infoRaw === 'string') {
-      videoInfo = JSON.parse(infoRaw);
-    } else if (infoRaw.stdout) {
-      videoInfo = JSON.parse(infoRaw.stdout);
-    } else {
-      videoInfo = infoRaw;
-    }
+    videoInfo = typeof infoRaw === 'string'
+      ? JSON.parse(infoRaw)
+      : (infoRaw.stdout ? JSON.parse(infoRaw.stdout) : infoRaw);
 
     const fileName = videoInfo.title + '.mp4';
-    filePath = path.join(videosDir, fileName);
+    filePath = path.join(UPLOAD_CONFIG.VIDEOS_DIR, fileName);
 
     // Download video
     await ytdlp(youtubeUrl, {
-      format: 'bv*+ba/best',
+      format: UPLOAD_CONFIG.YOUTUBE.FORMAT,
       output: filePath,
       noWarnings: true,
       ffmpegLocation: ffmpegPath.path || ffmpegPath,
-      mergeOutputFormat: 'mp4',
-      postprocessorArgs: '-c:v copy -c:a aac'
+      mergeOutputFormat: UPLOAD_CONFIG.YOUTUBE.MERGE_FORMAT,
+      postprocessorArgs: UPLOAD_CONFIG.YOUTUBE.POSTPROCESSOR_ARGS
     });
 
   } catch (err) {
     console.error('Error downloading YouTube video:', err);
-    if (fs.existsSync(filePath)) {
+    if (filePath && fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
     throw new Error('Failed to download video');
   }
 
-  // Update metadata in DB
+  // Check if video already exists
   const allVideos = getAllVideos();
   const existingVideo = allVideos.find(v => v.filename === path.basename(filePath));
 
   if (existingVideo) {
-    const updatedVideo = updateVideoMetadata(existingVideo.id, {
+    return updateVideoMetadata(existingVideo.id, {
       title: videoInfo.title,
       company_id: company.id,
       date: new Date().toISOString().split('T')[0],
       description: videoInfo.description || '',
       uploader: userId
     });
-    return updatedVideo;
-  } else {
-    const allVideosAfter = getAllVideos();
-    const newVideo = allVideosAfter.find(v => v.filename === path.basename(filePath));
-
-    if (newVideo) {
-      const updatedVideo = updateVideoMetadata(newVideo.id, {
-        title: videoInfo.title,
-        company_id: company.id,
-        date: new Date().toISOString().split('T')[0],
-        description: videoInfo.description || '',
-        uploader: userId
-      });
-      return updatedVideo;
-    } else {
-      const createdVideo = addVideo({
-        filename: path.basename(filePath),
-        title: videoInfo.title,
-        company_id: company.id,
-        date: new Date().toISOString().split('T')[0],
-        description: videoInfo.description || '',
-        uploader: userId,
-        tags: []
-      });
-      return createdVideo;
-    }
   }
+
+  // Create new video record
+  return createVideoRecord({
+    filename: path.basename(filePath),
+    title: videoInfo.title,
+    description: videoInfo.description || ''
+  }, company, userId);
 }
 
 /**
  * Upload a video file directly
  */
 export async function uploadVideoFile(file, userId, companyNameOrId) {
-  // Validate user
-  const user = getUserById(userId);
-  if (!user) throw new Error('User not found');
-  if (!companyNameOrId) throw new Error('Company name is required');
-
-  // Get or create company
-  let company = getCompanyByName(companyNameOrId);
-  if (!company) {
-    company = createCompany(companyNameOrId);
-    console.log(`Created new company: ${company.name} (${company.id})`);
+  // Validate request
+  const validation = validateUploadRequest(userId, companyNameOrId);
+  if (!validation.isValid) {
+    throw new Error(validation.error);
   }
 
-  try {
-    // File is already saved by multer in uploads/videos/
-    // Move it to the main videos directory
-    const sourceFile = file.path;
-    const destFile = path.join(videosDir, file.filename);
+  // Get or create company
+  const company = getOrCreateCompany(companyNameOrId);
 
-    // Move file
+  try {
+    // Move file to videos directory
+    const sourceFile = file.path;
+    const destFile = path.join(UPLOAD_CONFIG.VIDEOS_DIR, file.filename);
     fs.moveSync(sourceFile, destFile, { overwrite: true });
 
-    // Add video to database
-    const newVideo = addVideo({
+    // Create video record
+    return createVideoRecord({
       filename: file.filename,
-      title: file.originalname.replace(path.extname(file.originalname), ''),
-      company_id: company.id,
-      date: new Date().toISOString().split('T')[0],
-      description: `Uploaded by ${user.name}`,
-      uploader: userId,
-      tags: []
-    });
+      title: extractTitleFromFilename(file.originalname),
+      description: `Uploaded by ${validation.user.name}`
+    }, company, userId);
 
-    return newVideo;
   } catch (error) {
     // Clean up file on error
     if (fs.existsSync(file.path)) {
@@ -171,17 +138,14 @@ export async function uploadVideoFile(file, userId, companyNameOrId) {
  * Download video from a direct URL
  */
 export async function uploadVideoFromUrl(videoUrl, userId, companyNameOrId) {
-  // Validate user
-  const user = getUserById(userId);
-  if (!user) throw new Error('User not found');
-  if (!companyNameOrId) throw new Error('Company name is required');
+  // Validate request
+  const validation = validateUploadRequest(userId, companyNameOrId);
+  if (!validation.isValid) {
+    throw new Error(validation.error);
+  }
 
   // Get or create company
-  let company = getCompanyByName(companyNameOrId);
-  if (!company) {
-    company = createCompany(companyNameOrId);
-    console.log(`Created new company: ${company.name} (${company.id})`);
-  }
+  const company = getOrCreateCompany(companyNameOrId);
 
   // Import download utility
   const { downloadVideoFromUrl } = await import('../utils/downloadUtils.js');
@@ -191,27 +155,17 @@ export async function uploadVideoFromUrl(videoUrl, userId, companyNameOrId) {
     const filename = await downloadVideoFromUrl(videoUrl);
 
     // Move to videos directory
-    const uploadPath = path.join(__dirname, '../uploads/videos', filename);
-    const destPath = path.join(videosDir, filename);
+    const uploadPath = path.join(UPLOAD_CONFIG.TEMP_UPLOAD_DIR, filename);
+    const destPath = path.join(UPLOAD_CONFIG.VIDEOS_DIR, filename);
     fs.moveSync(uploadPath, destPath, { overwrite: true });
 
-    // Extract title from URL
-    const urlObj = new URL(videoUrl);
-    const urlPath = urlObj.pathname;
-    const title = path.basename(urlPath, path.extname(urlPath));
+    // Create video record
+    return createVideoRecord({
+      filename,
+      title: extractTitleFromUrl(videoUrl),
+      description: `Downloaded from ${videoUrl}`
+    }, company, userId);
 
-    // Add video to database
-    const newVideo = addVideo({
-      filename: filename,
-      title: title || 'Video from URL',
-      company_id: company.id,
-      date: new Date().toISOString().split('T')[0],
-      description: `Downloaded from ${videoUrl}`,
-      uploader: userId,
-      tags: []
-    });
-
-    return newVideo;
   } catch (error) {
     throw new Error(`Failed to download video from URL: ${error.message}`);
   }

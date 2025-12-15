@@ -73,6 +73,26 @@ export function useVideoPlayback(isFirst = false) {
         }
     };
 
+    const play = () => {
+        if (videoRef.current && !isPlaying) {
+            const playPromise = videoRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => setIsPlaying(true))
+                    .catch(error => {
+                        console.error('Error playing video:', error);
+                    });
+            }
+        }
+    };
+
+    const pause = () => {
+        if (videoRef.current && isPlaying) {
+            videoRef.current.pause();
+            setIsPlaying(false);
+        }
+    };
+
     const handleTimeUpdate = () => {
         if (videoRef.current) {
             const current = videoRef.current.currentTime;
@@ -109,6 +129,8 @@ export function useVideoPlayback(isFirst = false) {
         isPlaying,
         progress,
         togglePlayPause,
+        play,
+        pause,
         handleTimeUpdate,
         handleSeek,
         handleVideoEnd
