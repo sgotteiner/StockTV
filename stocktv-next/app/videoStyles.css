@@ -1,0 +1,234 @@
+/* Video Card Styles */
+.video-card {
+  width: 100%;
+  height: 95vh;
+  /* 95% of viewport height */
+  background-color: #000;
+  /* Black background for full-screen video */
+  overflow: hidden;
+  position: relative;
+  scroll-snap-align: start;
+  /* Snap to start of each video */
+  scroll-snap-stop: always;
+  /* Ensures it stops at each video */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* Prevent video cards from shrinking in flex container */
+}
+
+.video-info {
+  padding: var(--spacing-sm);
+  text-align: left;
+}
+
+.video-title {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+}
+
+.video-company,
+.video-date {
+  margin: var(--spacing-xs) 0;
+  color: #ccc;
+  font-size: var(--font-size-md);
+}
+
+.video-info-content h2 {
+  margin-top: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-xl);
+}
+
+.video-info-content p,
+.video-description {
+  margin: var(--spacing-md) 0;
+  color: #ccc;
+  font-size: var(--font-size-md);
+}
+
+.video-description {
+  font-style: italic;
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+/* Aspect Ratio Adjustments - Based on React's useVideoAspectRatio */
+.video-player.vertical {
+  object-fit: cover;
+}
+
+.video-player.horizontal {
+  object-fit: contain;
+  background-color: #000;
+}
+
+.video-player.square {
+  object-fit: contain;
+  background-color: #000;
+}
+
+/* Like Button Styles */
+.like-button {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  background-color: var(--color-overlay);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  /* Circle shape */
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  transition: background-color 0.3s;
+}
+
+.like-button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.like-button.liked {
+  color: var(--color-primary);
+}
+
+/* Swipe Indicator Styles */
+.swipe-indicator {
+  position: absolute;
+  bottom: 20%;
+  /* Positioned higher to account for video controls area */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-overlay);
+  color: white;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-md);
+  z-index: 15;
+  /* Higher than video but lower than like button */
+}
+
+/* Video Info View Styles */
+.video-info-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-secondary);
+  padding: var(--spacing-md);
+  box-sizing: border-box;
+}
+
+.video-info-content {
+  max-width: 100%;
+  text-align: center;
+  padding: var(--spacing-md);
+}
+
+
+.video-info-content h2 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text);
+  font-size: 4vh;
+  /* Relative title */
+}
+
+.video-info-content p {
+  margin: var(--spacing-md) 0;
+  color: #ccc;
+  font-size: 2.2vh;
+  /* Relative text */
+}
+
+.like-stats {
+  margin: var(--spacing-md) 0;
+  font-size: 3vh;
+  /* Relative stats */
+  font-weight: bold;
+  color: var(--color-text);
+}
+
+.back-to-video-btn {
+  background-color: var(--color-bg);
+  color: white;
+  border: 1px solid #555;
+  padding: 1.5vh 3vh;
+  /* Relative padding */
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 2vh;
+  /* Relative button text */
+  margin-top: 3vh;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.back-to-video-btn:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+/* Remove hover effects for continuous feed */
+.video-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Play/Pause Overlay */
+.play-icon-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 80px;
+  color: rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+  /* Let clicks pass through */
+  z-index: 10;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Video Progress Bar */
+.video-progress-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  /* Thin line like TikTok/stories */
+  background-color: rgba(255, 255, 255, 0.2);
+  z-index: 25;
+}
+
+.video-progress-bar {
+  height: 100%;
+  background-color: var(--color-primary);
+  /* Red progress */
+  transition: width 0.1s linear;
+}

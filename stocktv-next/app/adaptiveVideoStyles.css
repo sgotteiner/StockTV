@@ -1,0 +1,100 @@
+/* Adaptive Video Styles - Support for different aspect ratios */
+
+/* Vertical videos (9:16 - TikTok style) */
+.video-card.aspect-vertical .video-player {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.video-card.aspect-vertical .video-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Horizontal videos (16:9 - YouTube style) */
+.video-card.aspect-horizontal .video-player {
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+.video-card.aspect-horizontal .video-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+}
+
+/* Square videos (1:1 - Instagram style) */
+.video-card.aspect-square .video-player {
+    width: 100%;
+    height: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+.video-card.aspect-square .video-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Ensure controls are positioned correctly for all aspect ratios */
+.video-card.aspect-horizontal .like-button,
+.video-card.aspect-square .like-button {
+    bottom: 10%;
+    right: 5%;
+}
+
+.video-card.aspect-horizontal .video-progress-container,
+.video-card.aspect-square .video-progress-container {
+    bottom: 5%;
+}
+
+/* Desktop: larger horizontal videos */
+@media (min-width: 768px) {
+    .video-card.aspect-horizontal .video-player {
+        max-height: 70vh;
+        width: 100%;
+    }
+
+    .video-card.aspect-square .video-player {
+        max-height: 70vh;
+        max-width: 70vh;
+    }
+}
+
+/* Mobile: smaller horizontal videos */
+@media (max-width: 768px) {
+    .video-card.aspect-horizontal .video-player {
+        max-height: 60vh;
+    }
+}
+
+/* Maintain aspect ratio container */
+.aspect-ratio-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.aspect-ratio-container.vertical {
+    max-width: 56.25vh;
+    /* 9:16 aspect ratio */
+    margin: 0 auto;
+}
+
+.aspect-ratio-container.horizontal {
+    max-height: 56.25vw;
+    /* 16:9 aspect ratio */
+}
+
+.aspect-ratio-container.square {
+    max-width: 100vh;
+    max-height: 100vw;
+    margin: 0 auto;
+}

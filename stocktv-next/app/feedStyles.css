@@ -1,0 +1,27 @@
+/* Feed Container - TikTok Style Vertical Scroll */
+.feed-container,
+.video-feed {
+  height: 100vh;
+  width: 100vw;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  background: #000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-bottom: 60px;
+}
+
+/* Hide scrollbar but keep functionality */
+.feed-container::-webkit-scrollbar,
+.video-feed::-webkit-scrollbar {
+  display: none;
+}
+
+.feed-container,
+.video-feed {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
