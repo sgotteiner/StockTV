@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Video files - stored in Supabase Storage
+public/videos/*.mp4
+public/videos/*.webm
+public/videos/*.mov
